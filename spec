@@ -17,8 +17,8 @@ responses from qmail.
 %setup
 
 %build
-echo gcc "%{optflags}" >conf-cc
-echo gcc -s "%{optflags}" >conf-ld
+echo gcc "%{optflags}" -I/usr/local/bglibs/include >conf-cc
+echo gcc -s "%{optflags}" -L/usr/local/bglibs/lib >conf-ld
 make
 
 %install
