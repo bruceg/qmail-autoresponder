@@ -1,0 +1,8 @@
+- Split the response generation portion into a seperate program.
+- Write a man page!
+- Add option to limit size of copied message
+- Add option to write out a log file
+- Add support for an optional "schedule" file
+- Release version 0.95
+- Replace all command-line arguments except for DIRECTORY with option
+  files that go into DIRECTORY.

@@ -1,10 +1,16 @@
 -------------------------------------------------------------------------------
-Changes in version 0.94
+Changes in version 0.95
 
-- Minor portability fixes and documentation bugs.
+- Made the "MESSAGE-FILE" parameter optional, defaulting to
+  "message.txt" in the autoresponder directory.
 
 - Added a patch from Erik Sjoelund <erik@xpedio.com> to insert the
   original message's message-ID into a new In-Reply-To header field.
+
+- Ignore messages containing the header fields listed in RFC 2369:
+	List-(Help|Unsubscribe|Subscribe|Post|Owner|Archive):
+
+- Portability fixes and documentation bugs.
 -------------------------------------------------------------------------------
 Changes in version 0.93
 
