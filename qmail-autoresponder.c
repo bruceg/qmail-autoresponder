@@ -74,7 +74,7 @@ static void usage(const char* msg)
   exit(111);
 }
 
-void parse_args(int argc, char* argv[])
+static void parse_args(int argc, char* argv[])
 {
   char* ptr;
   int ch;
@@ -113,7 +113,7 @@ void parse_args(int argc, char* argv[])
   now = time(0);
 }
 
-void check_sender(const char* sender)
+static void check_sender(const char* sender)
 {
   // Ignore messages with an empty SENDER (sent from system)
   if(!sender[0])
@@ -136,7 +136,7 @@ static const char* skip_space(const char* str)
 static char header[8192];
 static ssize_t headersize;
 
-void parse_header(const char* str, unsigned length)
+static void parse_header(const char* str, unsigned length)
 {
   if(!strncasecmp(str, "List-ID:", 8))
     ignore("Message appears to be from a mailing list (List-ID header)");
@@ -168,7 +168,7 @@ void parse_header(const char* str, unsigned length)
   }
 }
 
-void parse_headers(void)
+static void parse_headers(void)
 {
   char* ptr = header;
   const char* headerend;
@@ -211,7 +211,7 @@ void parse_headers(void)
     ignore("Header of received message was too long");
 }
 
-void exec_qmail_inject(const char* sender, int fd)
+static void exec_qmail_inject(const char* sender, int fd)
 {
   putenv("QMAILNAME=");
   putenv("QMAILUSER=");
@@ -224,7 +224,7 @@ void exec_qmail_inject(const char* sender, int fd)
   fail_temp("Could not exec qmail-inject");
 }
 
-int popen_inject(const char* sender)
+static int popen_inject(const char* sender)
 {
   int fds[2];
   if(pipe(fds) == -1)
@@ -244,7 +244,7 @@ int popen_inject(const char* sender)
   return fds[1];
 }
 
-void pclose_inject(int fdout)
+static void pclose_inject(int fdout)
 {
   int status;
   close(fdout);
@@ -256,7 +256,7 @@ void pclose_inject(int fdout)
     fail_temp("qmail-inject failed");
 }
 
-void parse_write_block(int fdout, const char* buf, size_t len)
+static void parse_write_block(int fdout, const char* buf, size_t len)
 {
   static int saw_percent = 0;
   while(len > 0) {
@@ -292,7 +292,7 @@ void parse_write_block(int fdout, const char* buf, size_t len)
   }
 }
     
-void copy_input(int fdout)
+static void copy_input(int fdout)
 {
   ssize_t rd;
   char buf[4096];
@@ -305,7 +305,7 @@ void copy_input(int fdout)
   }
 }
 
-void copy_msgfile(int fdin, int fdout)
+static void copy_msgfile(int fdin, int fdout)
 {
   ssize_t rd;
   char buf[4096];
@@ -313,7 +313,7 @@ void copy_msgfile(int fdin, int fdout)
     parse_write_block(fdout, buf, rd);
 }
 
-int count_history(const char* sender, unsigned max)
+static int count_history(const char* sender, unsigned max)
 {
   DIR* dir = opendir(".");
   struct dirent* entry;
