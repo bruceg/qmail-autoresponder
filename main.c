@@ -28,10 +28,8 @@ str response = {0,0,0};
 static const char* dtline;
 static size_t dtline_len;
 static pid_t inject_pid;
-static const char* subject = "Your mail";
-static ssize_t subject_len = 9;
-static const char* message_id = NULL;
-static ssize_t message_id_len = 0;
+static str subject;
+static str message_id;
 
 void fail_msg(const char* msg)
 {
@@ -111,14 +109,10 @@ static void parse_header(const char* str, unsigned length)
   }
   else if(!strncasecmp(str, dtline, dtline_len-1))
     ignore("Message already has my Delivered-To line");
-  else if(!strncasecmp(str, "Subject:", 8)) {
-    subject = skip_space(str + 8);
-    subject_len = strlen(subject);
-  }
-  else if(!strncasecmp(str, "Message-ID:", 11)) {
-    message_id = skip_space(str + 11);
-    message_id_len = strlen(message_id);
-  }
+  else if(!strncasecmp(str, "Subject:", 8))
+    str_copys(&subject, str+8);
+  else if(!strncasecmp(str, "Message-ID:", 11))
+    str_copys(&message_id, skip_space(str+11));
 }
 
 static void parse_headers(void)
@@ -224,7 +218,7 @@ static void write_response(obuf* out)
       ++buf; --len;
       switch (*buf) {
       case 'S':
-	obuf_puts(out, subject);
+	obuf_putstr(out, &subject);
 	++buf; --len;
 	break;
       default:
@@ -318,6 +312,7 @@ int main(int argc, char* argv[])
   
   check_sender(sender);
 
+  str_copys(&subject, "Your mail");
   // Read and parse header
   parse_headers();
 
@@ -336,9 +331,9 @@ int main(int argc, char* argv[])
   
   obuf_put4s(out, dtline, "To: <", sender, ">\n");
   if(opt_subject_prefix)
-    obuf_put4s(out, "Subject: ", opt_subject_prefix, subject, "\n");
-  if((!opt_no_inreplyto) && (message_id_len != 0))
-    obuf_put3s(out, "In-Reply-To: ", message_id, "\n");
+    obuf_put4s(out, "Subject: ", opt_subject_prefix, subject.s, "\n");
+  if((!opt_no_inreplyto) && (message_id.len != 0))
+    obuf_put3s(out, "In-Reply-To: ", message_id.s, "\n");
 
   write_response(out);
   
