@@ -1,6 +1,8 @@
 -------------------------------------------------------------------------------
 Changes in version 0.96.1
 
+- Added missing MySQL schema to package.
+
 Development of this version has been sponsored by FutureQuest, Inc.
 ossi@FutureQuest.net  http://www.FutureQuest.net/
 -------------------------------------------------------------------------------
