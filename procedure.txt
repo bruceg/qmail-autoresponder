@@ -26,7 +26,7 @@ Check SENDER rate (directory method)
 - For each entry in directory listing:
   - split filename into TIMESTAMP, PID, ADDRESS parts
   - ignore filenames that don't match these parts
-  - if (NOW-TIMESTAMP) < INTERVAL: remove file and ignore
+  - if (NOW-TIMESTAMP) > INTERVAL: remove file and ignore
   - if ADDRESS == SENDER:
     - add one to Rate
     - if Rate is above maximum, fail without creating another file
