@@ -7,6 +7,8 @@ Changes in version 0.96
 - Removed the option to omit the "To:" header, to allow for copying the
   response to extra addresses by adding BCCs to the message.
 
+- Switched to using external bglibs.
+
 Development of this version has been sponsored by FutureQuest, Inc.
 ossi@FutureQuest.net  http://www.FutureQuest.net/
 -------------------------------------------------------------------------------
