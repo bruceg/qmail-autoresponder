@@ -1,4 +1,10 @@
 -------------------------------------------------------------------------------
+Changes in version 0.93
+
+- Fixed an off-by-one bug in the rate limiting logic (again).
+
+- Fixed an off-by-one bug in the Delivered-To checking code.
+-------------------------------------------------------------------------------
 Changes in version 0.92
 
 - Fixed the rate limiting logic that would prevent messages from being

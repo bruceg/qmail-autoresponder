@@ -1,5 +1,5 @@
 PACKAGE = qmail-autoresponder
-VERSION = 0.92
+VERSION = 0.93
 
 CC = gcc
 CFLAGS = -Wall -W -O0 -g

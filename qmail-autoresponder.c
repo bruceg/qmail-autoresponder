@@ -149,7 +149,7 @@ void parse_header(const char* str, unsigned length)
        !strncasecmp(start, "list", end-start))
       ignore("Message has a junk, bulk, or list precedence header");
   }
-  else if(!strncasecmp(str, dtline, dtline_len))
+  else if(!strncasecmp(str, dtline, dtline_len-1))
     ignore("Message already has my Delivered-To line");
   else if(!strncasecmp(str, "Subject:", 8))
     subject = str + 8;
@@ -304,7 +304,7 @@ int count_history(const char* sender, unsigned max)
       if(strcasecmp(end+1, sender_copy)==0)
 	/* If the user's count is already over the max,
 	 * don't record any more. */
-	if(++count > max)
+	if(++count >= max)
 	  return 0;
       last_filename = entry->d_name;
     }
