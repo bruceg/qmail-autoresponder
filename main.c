@@ -109,10 +109,14 @@ static void parse_header(const char* str, unsigned length)
   }
   else if(!strncasecmp(str, dtline, dtline_len-1))
     ignore("Message already has my Delivered-To line");
-  else if(!strncasecmp(str, "Subject:", 8))
+  else if(!strncasecmp(str, "Subject:", 8)) {
     str_copys(&subject, str+8);
-  else if(!strncasecmp(str, "Message-ID:", 11))
+    str_strip(&subject);
+  }
+  else if(!strncasecmp(str, "Message-ID:", 11)) {
     str_copys(&message_id, skip_space(str+11));
+    str_strip(&message_id);
+  }
 }
 
 static void parse_headers(void)
