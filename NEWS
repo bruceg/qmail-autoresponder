@@ -11,6 +11,11 @@ Changes in version 0.95
 	List-(Help|Unsubscribe|Subscribe|Post|Owner|Archive):
 
 - Portability fixes and documentation bugs.
+
+- Added a manual page.
+
+Development of this version has been sponsored by FutureQuest, Inc.
+ossi@FutureQuest.net  http://www.FutureQuest.net/
 -------------------------------------------------------------------------------
 Changes in version 0.93
 

@@ -2,7 +2,7 @@ qmail-autoresponder
 Rate-limited autoresponder for qmail
 Bruce Guenter <bruceg@em.ca>
 Version 0.95
-2001-09-11
+2001-09-14
 
 This is a simple program to automatically respond to emails.
 

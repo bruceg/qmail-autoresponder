@@ -5,7 +5,7 @@ Release: 1
 Copyright: GPL
 Group: Utilities/System
 Source: http://em.ca/~bruceg/@PACKAGE@/%{version}/@PACKAGE@-%{version}.tar.gz
-BuildRoot: %{_tmpdir}/@PACKAGE@-root
+BuildRoot: %{_tmppath}/@PACKAGE@-root
 URL: http://em.ca/~bruceg/@PACKAGE@/
 Packager: Bruce Guenter <bruceg@em.ca>
 
