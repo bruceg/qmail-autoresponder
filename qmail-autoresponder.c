@@ -12,7 +12,6 @@ const char usage_post[] =
 "  Temporary files are put into DIRECTORY track senders' rates.\n"
 "  MESSAGE-FILE defaults to 'message.txt'.\n";
 
-static int opt_nolinks = 0;
 static const char* opt_msgfilename = "message.txt";
 
 static void read_message(const char* filename)
@@ -40,6 +39,21 @@ void init_autoresponder(int argc, char* argv[])
   if(chdir(argv[optind]) == -1)
     usage("Could not change directory to DIRECTORY.");
   read_message(opt_msgfilename);
+}
+
+static void create_link(const char* last_filename, const char* filename)
+{
+  /* Conserve inodes -- create links when possible */
+  if(last_filename)
+    if(link(last_filename, filename) == 0)
+      return;
+
+  /* Otherwise, create a new 0-byte file now */
+  fd = open(filename, O_WRONLY|O_CREAT|O_EXCL, 0444);
+  free(filename);
+  if(fd == -1)
+    fail_temp("Unable to create temporary file for sender.");
+  close(fd);
 }
 
 int count_history(const char* sender)
@@ -93,19 +107,6 @@ int count_history(const char* sender)
     }
   }
 
-  /* Conserve inodes -- create links when possible */
-  if(last_filename && !opt_nolinks) {
-    if(link(last_filename, filename) == -1)
-      fail_temp("Could not create link for sender");
-  }
-  /* Otherwise, create a new 0-byte file now */
-  else {
-    fd = open(filename, O_WRONLY|O_CREAT|O_EXCL, 0444);
-    free(filename);
-    if(fd == -1)
-      fail_temp("Unable to create temporary file for sender.");
-    close(fd);
-  }
-  
+  create_link(last_filename, filename);
   return 1;
 }
