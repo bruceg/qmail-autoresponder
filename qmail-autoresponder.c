@@ -14,6 +14,7 @@ static int opt_copyinput = 0;
 static int opt_nosend = 0;
 static int opt_nolinks = 0;
 static int opt_notoline = 0;
+static int opt_no_inreplyto = 0;
 static time_t opt_timelimit = 3600;
 static unsigned opt_maxmsgs = 1;
 static const char* opt_subject_prefix = 0;
@@ -27,6 +28,8 @@ static size_t dtline_len;
 static pid_t inject_pid;
 static const char* subject = "Your mail";
 static ssize_t subject_len = 9;
+static const char* message_id = NULL;
+static ssize_t message_id_len = 0;
 
 static void fail_msg(const char* msg)
 {
@@ -157,6 +160,12 @@ void parse_header(const char* str, unsigned length)
       ++subject;
     subject_len = strlen(subject);
   }
+  else if(!strncasecmp(str, "Message-ID:", 11)) {
+    message_id = str + 11;
+    while(*message_id && isspace(*message_id))
+      ++message_id;
+    message_id_len = strlen(message_id);
+  }
 }
 
 void parse_headers(void)
@@ -187,8 +196,10 @@ void parse_headers(void)
     while(ptr < headerend) {
       if(*ptr++ == '\n') {
 	if(ptr >= headerend || *ptr == '\n' || !isspace(*ptr)) {
+	  char tmp = ptr[-1];
 	  ptr[-1] = 0;
 	  parse_header(start, ptr-start-1);
+	  ptr[-1] = tmp;
 	  break;
 	}
       }
@@ -410,6 +421,11 @@ int main(int argc, char* argv[])
     write(fdout, "Subject: ", 9);
     write(fdout, opt_subject_prefix, strlen(opt_subject_prefix));
     write(fdout, subject, subject_len);
+    write(fdout, "\n", 1);
+  }
+  if((!opt_no_inreplyto) && (message_id_len != 0)) {
+    write(fdout, "In-Reply-To: ", 13);
+    write(fdout, message_id, message_id_len);
     write(fdout, "\n", 1);
   }
   copy_msgfile(opt_msgfile, fdout);

@@ -1,4 +1,12 @@
 -------------------------------------------------------------------------------
+Changes in version 0.94
+
+- Minor portability fixes and documentation bugs.  If the version 0.93
+  worked for you, don't bother with this one.
+
+- Added a patch from Erik Sjoelund <erik@xpedio.com> to insert the
+  original message's message-ID into a new In-Reply-To header field.
+-------------------------------------------------------------------------------
 Changes in version 0.93
 
 - Fixed an off-by-one bug in the rate limiting logic (again).

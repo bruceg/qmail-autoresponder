@@ -1,5 +1,5 @@
 PACKAGE = qmail-autoresponder
-VERSION = 0.93
+VERSION = 0.94
 
 CC = gcc
 CFLAGS = -Wall -W -O0 -g
@@ -7,6 +7,8 @@ CFLAGS = -Wall -W -O0 -g
 LD = gcc
 LDFLAGS = -g
 LIBS =
+
+RM = rm -f
 
 install_prefix =
 prefix = $(install_prefix)/usr
