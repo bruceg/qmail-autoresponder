@@ -151,6 +151,9 @@ void parse_headers(void)
 {
   const char* ptr = header;
   const char* headerend = header + sizeof(header);
+
+  if(lseek(0, 0, SEEK_SET) == -1)
+    fail_temp("Could not rewind input message.");
   
   // Only read in a fixed number of bytes
   headersize = read(0, header, sizeof(header));
