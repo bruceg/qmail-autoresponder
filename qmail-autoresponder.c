@@ -126,6 +126,13 @@ void check_sender(const char* sender)
     ignore("SENDER was mailer-daemon");
 }
 
+static const char* skip_space(const char* str)
+{
+  while(*str && isspace(*str))
+    ++str;
+  return str;
+}
+
 static char header[8192];
 static ssize_t headersize;
 
@@ -140,11 +147,8 @@ void parse_header(const char* str, unsigned length)
   else if(!strncasecmp(str, "X-ML-Name:", 10))
     ignore("Message appears to be from a mailing list (X-ML-Name header)");
   else if(!strncasecmp(str, "Precedence:", 11)) {
-    const char* start = str + 11;
-    const char* end;
-    while(start < str+length && isspace(*start))
-      ++start;
-    end = start;
+    const char* start = skip_space(str + 11);
+    const char* end = start;
     while(end < str+length && !isspace(*end))
       ++end;
     if(!strncasecmp(start, "junk", end-start) ||
@@ -155,15 +159,11 @@ void parse_header(const char* str, unsigned length)
   else if(!strncasecmp(str, dtline, dtline_len-1))
     ignore("Message already has my Delivered-To line");
   else if(!strncasecmp(str, "Subject:", 8)) {
-    subject = str + 8;
-    while(*subject && isspace(*subject))
-      ++subject;
+    subject = skip_space(str + 8);
     subject_len = strlen(subject);
   }
   else if(!strncasecmp(str, "Message-ID:", 11)) {
-    message_id = str + 11;
-    while(*message_id && isspace(*message_id))
-      ++message_id;
+    message_id = skip_space(str + 11);
     message_id_len = strlen(message_id);
   }
 }
