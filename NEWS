@@ -4,6 +4,9 @@ Changes in version 0.93
 - Fixed an off-by-one bug in the rate limiting logic (again).
 
 - Fixed an off-by-one bug in the Delivered-To checking code.
+
+- The output writing routine will now substitute "%S" in the
+  autoresponse message with the original message's subject.
 -------------------------------------------------------------------------------
 Changes in version 0.92
 

@@ -8,10 +8,85 @@ cat >message.txt <<EOF
 From: nobody in particular
 
 test
+test %S test
+EOF
+
+# This big message splits the "%S" across a buffer boundary
+cat >big-message.txt <<EOF
+From: nobody in particular
+
+sage with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+This is a very long test message with lots of boring contents
+Thi%S
 EOF
 
 export DTLINE="Delivered-To: somebody
 "
+export MSGFILE="message.txt"
 
 ar() {
   succeeds=$1
@@ -27,7 +102,7 @@ ar() {
       echo "$line"
     done
   } >tempfile
-  if ! ../qmail-autoresponder -N $args message.txt . <tempfile >stdout 2>stderr
+  if ! ../qmail-autoresponder -N $args $MSGFILE . <tempfile >stdout 2>stderr
   then
     echo "qmail-autoresponder failed"
     exit 1
@@ -86,10 +161,15 @@ ar false nine@my.domain ''	'delivered-to: somebody'
 
 # Check that the subject line can get added to response
 ar true  ten@my.domain '-s Re:' 'subject: subject test'
-egrep -q '^Subject: Re: subject test$' stdout
+egrep -q '^Subject: Re:subject test$' stdout
+egrep -q '^test subject test test$' stdout
+
+# Check if the parser can handle a "%S" split across buffers
+MSGFILE=big-message.txt ar true  eleven@my.domain '' 'subject: subject test'
+egrep -q '^Thisubject test$' stdout
 
 # Check for operation of "-T" option
-ar true  eleven@my.domain '-T'
+ar true  twelve@my.domain '-T'
 egrep -vq '^To:' stdout
 
 trap - EXIT

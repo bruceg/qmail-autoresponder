@@ -2,7 +2,7 @@ qmail-autoresponder
 Rate-limited autoresponder for qmail
 Bruce Guenter <bruceg@em.ca>
 Version 0.93
-2000-07-29
+2000-07-30
 
 This is a simple program to automatically respond to emails.
 
@@ -16,15 +16,19 @@ Features:
 - Will not respond to nearly every type of mailing list or bulk email.
 - Will not respond to bounce messages or MAILER-DAEMON.
 - Bounces looping messages.
+- Can insert the original subject into the response.
 - Can copy original message into response.
-- Uses links in the rate-limiting data directory to preserve inodes.
+- Can use links in the rate-limiting data directory to limit inode usage
+  to a single inode.
 
 Usage:
 
 Put "|qmail-autoresponder MESSAGE_FILE DIRECTORY" into your ".qmail"
 file before other delivery instructions.  MESSAGE_FILE is a
 pre-formatted response, including headers, and DIRECTORY is the
-directory into which rate-limiting information will be stored.
+directory into which rate-limiting information will be stored.  Any
+instance of "%S" in MESSAGE_FILE will be replaced with the original
+subject.
 
 This program is Copyright(C) 2000 Bruce Guenter, and may be copied
 according to the GNU GENERAL PUBLIC LICENSE (GPL) Version 2 or a later

@@ -26,7 +26,8 @@ static time_t now;
 static const char* dtline;
 static size_t dtline_len;
 static pid_t inject_pid;
-static const char* subject = " Your mail";
+static const char* subject = "Your mail";
+static ssize_t subject_len = 9;
 
 static void fail_msg(const char* msg)
 {
@@ -48,7 +49,7 @@ static void ignore(const char* msg)
 }
 
 static const char* usage_str =
-"usage: %s [-cqLNT] [-n NUM] [-t TIME] MESSAGE-FILE DIRECTORY
+"usage: %s [-cqLNT] [-n NUM] [-s STR] [-t TIME] MESSAGE-FILE DIRECTORY
   -c       Copy message into response
   -n NUM   Set the maximum number of replies (defaults to 1)
   -s STR   Add the subject to the autoresponse, prefixed by STR
@@ -151,8 +152,12 @@ void parse_header(const char* str, unsigned length)
   }
   else if(!strncasecmp(str, dtline, dtline_len-1))
     ignore("Message already has my Delivered-To line");
-  else if(!strncasecmp(str, "Subject:", 8))
+  else if(!strncasecmp(str, "Subject:", 8)) {
     subject = str + 8;
+    while(*subject && isspace(*subject))
+      ++subject;
+    subject_len = strlen(subject);
+  }
 }
 
 void parse_headers(void)
@@ -241,22 +246,62 @@ void pclose_inject(int fdout)
     fail_temp("qmail-inject failed");
 }
 
-void copy_fd(int fdin, int fdout)
+void parse_write_block(int fdout, const char* buf, size_t len)
+{
+  static int saw_percent = 0;
+  while(len > 0) {
+    ssize_t todo;
+    ssize_t incr;
+    char* next;
+    if(saw_percent) {
+      write(2, "Delayed percent\n", 16);
+      saw_percent = 0;
+      switch(*buf) {
+      case 'S':
+	if(write(fdout, subject, subject_len) != subject_len)
+	  fail_temp("Could not write subject in parse_write_block");
+	++buf;
+	--len;
+	continue;
+      default:
+	write(fdout, "%", 1);
+	break;
+      }
+    }
+    next = memchr(buf, '%', len);
+    if(next) {
+      todo = next - buf;
+      incr = todo + 1;
+      saw_percent = 1;
+    }
+    else
+      incr = todo = len;
+    if(write(fdout, buf, todo) != todo)
+      fail_temp("Could not write to output in parse_write_block");
+    len -= incr;
+    buf += incr;
+  }
+}
+    
+void copy_input(int fdout)
 {
   ssize_t rd;
   char buf[4096];
-  while((rd = read(fdin, buf, 4096)) > 0) {
+  if(write(fdout, header, headersize) != headersize)
+    fail_temp("Could not write header in copy_input");
+  while((rd = read(0, buf, 4096)) > 0) {
     ssize_t wr = write(fdout, buf, rd);
     if(wr != rd)
-      fail_temp("Could not write to output in copy_fd");
+      fail_temp("Could not write to output in copy_input");
   }
 }
 
-void copy_input(int fdout)
+void copy_msgfile(int fdin, int fdout)
 {
-  if(write(fdout, header, headersize) != headersize)
-    fail_temp("Error writing header to qmail-inject");
-  copy_fd(0, fdout);
+  ssize_t rd;
+  char buf[4096];
+  while((rd = read(fdin, buf, 4096)) > 0)
+    parse_write_block(fdout, buf, rd);
 }
 
 int count_history(const char* sender, unsigned max)
@@ -366,10 +411,10 @@ int main(int argc, char* argv[])
   if(opt_subject_prefix) {
     write(fdout, "Subject: ", 9);
     write(fdout, opt_subject_prefix, strlen(opt_subject_prefix));
-    write(fdout, subject, strlen(subject));
+    write(fdout, subject, subject_len);
     write(fdout, "\n", 1);
   }
-  copy_fd(opt_msgfile, fdout);
+  copy_msgfile(opt_msgfile, fdout);
   close(opt_msgfile);
   
   if(opt_copyinput)
