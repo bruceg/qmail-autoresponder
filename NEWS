@@ -1,4 +1,9 @@
 -------------------------------------------------------------------------------
+Changes in version 0.96.1
+
+Development of this version has been sponsored by FutureQuest, Inc.
+ossi@FutureQuest.net  http://www.FutureQuest.net/
+-------------------------------------------------------------------------------
 Changes in version 0.96
 
 - Added code to use MySQL instead of files for all the autoresponse
