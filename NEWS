@@ -9,6 +9,8 @@ Changes in version 0.96
 
 - Switched to using external bglibs.
 
+- Removed adding the Delivered-To: line to outgoing messages.
+
 Development of this version has been sponsored by FutureQuest, Inc.
 ossi@FutureQuest.net  http://www.FutureQuest.net/
 -------------------------------------------------------------------------------

@@ -329,7 +329,7 @@ int main(int argc, char* argv[])
     out = &bufout;
   }
   
-  obuf_put4s(out, dtline, "To: <", sender, ">\n");
+  obuf_put3s(out, "To: <", sender, ">\n");
   if(opt_subject_prefix)
     obuf_put4s(out, "Subject: ", opt_subject_prefix, subject.s, "\n");
   if((!opt_no_inreplyto) && (message_id.len != 0))
