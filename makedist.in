@@ -1,4 +1,4 @@
-PKGURL=http://em.ca/~bruceg/autoresponder/
+PKGURL=http://em.ca/~bruceg/qmail-autoresponder/
 #LISTSUB=rpms-subscribe@lists.em.ca
 MAKERPM=true
 NOARCH=
@@ -7,6 +7,6 @@ EXTRAS=""
 EXTRAS_VER="ANNOUNCEMENT"
 EXTRAS_DIST=""
 VERSION_BASE=
-REMOTEPATH=bruceg@em.ca:www/autoresponder
+REMOTEPATH=bruceg@em.ca:www/qmail-autoresponder
 RPMUPLOAD=
 LIST=qmail@list.cr.yp.to

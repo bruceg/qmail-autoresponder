@@ -23,7 +23,7 @@ ar() {
     do
       echo "$line"
     done
-  } | ../autoresponder -N message.txt . >/dev/null
+  } | ../qmail-autoresponder -N message.txt . >/dev/null
 }
 
 set -e
