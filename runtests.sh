@@ -15,7 +15,8 @@ export DTLINE="Delivered-To: somebody
 
 ar() {
   export SENDER="$1"
-  shift 1
+  args="$2"
+  shift 2
   echo "Test SENDER=$SENDER; $@"
   {
     echo 'From: somebody'
@@ -25,7 +26,7 @@ ar() {
       echo "$line"
     done
   } >tempfile
-  ../qmail-autoresponder -N -s Re: message.txt . <tempfile >stdout 2>stderr
+  ../qmail-autoresponder -N $args message.txt . <tempfile >stdout 2>stderr
 }
 
 set -e
@@ -36,21 +37,44 @@ exitfn() {
 }
 trap exitfn EXIT
 
-ar 'me@my'
-! ar ''
-! ar '#@[]'
-! ar 'mailer-daemon@here'
-! ar 'mailer-daemonx@here'
-! ar 'mailer-daemon'
-! ar 'me@my'
-! ar $RANDOM@$RANDOM	'list-id: list'
-! ar $RANDOM@$RANDOM	'mailing-list: list'
-! ar $RANDOM@$RANDOM	'x-mailing-list: list'
-! ar $RANDOM@$RANDOM	'x-ml-name: list'
-ar $RANDOM@$RANDOM	'precedence: other'
-! ar $RANDOM@$RANDOM	'precedence: junk'
-! ar $RANDOM@$RANDOM	'precedence: bulk'
-! ar $RANDOM@$RANDOM	'precedence: list'
-! ar $RANDOM@$RANDOM	'delivered-to: somebody'
+# Should send response normally
+ar 'me@my.domain' ''
+# Check that the response contains the sender in a to: header
+egrep -q '^To: <me@my.domain>$' stdout
+# Don't send immediately to the same recipient
+! ar 'me@my.domain' ''
+# Should send again after rate limit has expired
+sleep 2
+ar 'me@my.domain' '-t 1'
+
+# Don't send to empty sender (mail daemon)
+! ar '' ''
+# Don't send to <#@[]> (qmail mail daemon)
+! ar '#@[]' ''
+# Don't send to mailer-daemon
+! ar 'mailer-daemon@here' ''
+# Don't send to mailer-daemon*
+! ar 'mailer-daemonx@here' ''
+# Don't send to addresses without a hostname
+! ar 'somebody' ''
+
+# Don't send to mailing lists
+! ar one@my.domain ''	'list-id: list'
+! ar two@my.domain ''	'mailing-list: list'
+! ar three@my.domain ''	'x-mailing-list: list'
+! ar four@my.domain ''	'x-ml-name: list'
+ar five@my.domain ''	'precedence: other'
+! ar six@my.domain ''	'precedence: junk'
+! ar seven@my.domain ''	'precedence: bulk'
+! ar eight@my.domain ''	'precedence: list'
+! ar nine@my.domain ''	'delivered-to: somebody'
+
+# Check that the subject line can get added to response
+ar ten@my.domain '-s Re:' 'subject: subject test'
+egrep -q '^Subject: Re: subject test$' stdout
+
+# Check for operation of "-T" option
+ar eleven@my.domain '-T'
+egrep -vq '^To:' stdout
 
 trap - EXIT

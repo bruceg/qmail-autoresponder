@@ -80,14 +80,14 @@ void parse_args(int argc, char* argv[])
     switch(ch) {
     case 'c': opt_copyinput = 1; break;
     case 'n':
-      opt_maxmsgs = strtoul(argv[optind+1], &ptr, 10);
+      opt_maxmsgs = strtoul(optarg, &ptr, 10);
       if(*ptr)
 	usage("Invalid number for NUL.");
       break;
     case 'q': opt_quiet = 1;   break;
     case 's': opt_subject_prefix = optarg; break;
     case 't':
-      opt_timelimit = strtoul(argv[optind], &ptr, 10);
+      opt_timelimit = strtoul(optarg, &ptr, 10);
       if(*ptr)
 	usage("Invalid number for TIME.");
       break;
@@ -198,15 +198,14 @@ void parse_headers(void)
 
 void exec_qmail_inject(const char* sender, int fd)
 {
-  const char* args[] = { "/var/qmail/bin/qmail-inject",
-			 "-a", "-f", "", sender, 0 };
   putenv("QMAILNAME=");
   putenv("QMAILUSER=");
   putenv("QMAILHOST=");
   close(0);
   dup2(fd, 0);
   close(fd);
-  execv(args[0], (char**)args);
+  execl("/var/qmail/bin/qmail-inject", "/var/qmail/bin/qmail-inject",
+	"-a", "-f", "", sender, 0);
   fail_temp("Could not exec qmail-inject");
 }
 
@@ -260,7 +259,7 @@ void copy_input(int fdout)
   copy_fd(0, fdout);
 }
 
-unsigned count_history(const char* sender)
+int count_history(const char* sender, unsigned max)
 {
   DIR* dir = opendir(".");
   struct dirent* entry;
@@ -270,8 +269,8 @@ unsigned count_history(const char* sender)
   size_t sender_len;
   char* sender_copy;
   size_t i;
-  int created_file = 0;
-  
+  char* last_filename = 0;
+
   /* Translate all '/' to ':', to avoid fake paths in email addresses */
   sender_len = strlen(sender);
   sender_copy = malloc(sender_len+1);
@@ -303,18 +302,21 @@ unsigned count_history(const char* sender)
       unlink(entry->d_name);
     } else {
       if(strcasecmp(end+1, sender_copy)==0)
-	count++;
-      /* Conserve inodes -- create links when possible */
-      if(!opt_nolinks && !created_file) {
-	if(link(entry->d_name, filename) == -1)
-	  fail_temp("Could not create link for sender");
-	created_file = 1;
-      }
+	/* If the user's count is already over the max,
+	 * don't record any more. */
+	if(++count > max)
+	  return 0;
+      last_filename = entry->d_name;
     }
   }
 
-  /* If no file was created, create a new 0-byte file now */
-  if(!created_file) {
+  /* Conserve inodes -- create links when possible */
+  if(last_filename && !opt_nolinks) {
+    if(link(last_filename, filename) == -1)
+      fail_temp("Could not create link for sender");
+  }
+  /* Otherwise, create a new 0-byte file now */
+  else {
     fd = open(filename, O_WRONLY|O_CREAT|O_EXCL, 0444);
     free(filename);
     if(fd == -1)
@@ -322,12 +324,11 @@ unsigned count_history(const char* sender)
     close(fd);
   }
   
-  return count + 1;
+  return 1;
 }
 
 int main(int argc, char* argv[])
 {
-  unsigned rate;
   int fdout;
   const char* sender;
   
@@ -348,8 +349,7 @@ int main(int argc, char* argv[])
   parse_headers();
 
   // Check rate that SENDER has sent
-  rate = count_history(sender);
-  if(rate > opt_maxmsgs)
+  if(!count_history(sender, opt_maxmsgs))
     ignore("SENDER has sent too many messages");
 
   if(opt_nosend)

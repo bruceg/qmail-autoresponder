@@ -27,7 +27,9 @@ Check SENDER rate (directory method)
   - split filename into TIMESTAMP, PID, ADDRESS parts
   - ignore filenames that don't match these parts
   - if (NOW-TIMESTAMP) < INTERVAL: remove file and ignore
-  - if ADDRESS == SENDER: add one to Rate
+  - if ADDRESS == SENDER:
+    - add one to Rate
+    - if Rate is above maximum, fail without creating another file
 - Create a new file in the directory, named as above, optionally using a
   link instead of a new file to preserve inodes.
 - Return RATE+1 (add one for the current message)

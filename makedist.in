@@ -9,4 +9,4 @@ EXTRAS_DIST="COPYING"
 VERSION_BASE=
 REMOTEPATH=bruceg@em.ca:www/qmail-autoresponder
 RPMUPLOAD=
-LIST="qmail@list.cr.yp.to bgware@lists.em.ca"
+LIST="bgware@lists.em.ca"

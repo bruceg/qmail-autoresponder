@@ -1,4 +1,11 @@
 -------------------------------------------------------------------------------
+Changes in version 0.92
+
+- Fixed the rate limiting logic that would prevent messages from being
+  sent out at the appropriate interval.
+
+- Fixed bug in option parsing.
+-------------------------------------------------------------------------------
 Changes in version 0.91
 
 - Added an option to insert the original subject into the reply.
