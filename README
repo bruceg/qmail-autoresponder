@@ -21,7 +21,7 @@ Features:
 - Can use links in the rate-limiting data directory to limit inode usage
   to a single inode.
 
-Usage:
+Usage (file-based):
 
 Put "|qmail-autoresponder MESSAGE_FILE DIRECTORY" into your ".qmail"
 file before other delivery instructions.  MESSAGE_FILE is a
@@ -29,6 +29,16 @@ pre-formatted response, including headers, and DIRECTORY is the
 directory into which rate-limiting information will be stored.  Any
 instance of "%S" in MESSAGE_FILE will be replaced with the original
 subject.
+
+Usage (MySQL):
+
+Put "|qmail-autoresponder USERNAME DOMAIN" into your ".qmail" file
+before other delivery instructions.  All data (including the message)
+will be pulled from the MySQL table.  See schema.mysql for a table
+schema.  This program reads MySQL options from the "qmail-autoresponder"
+group.  If $MYSQL_USER, $MYSQL_HOST, $MYSQL_PASS, $MYSQL_DB, or
+$MYSQL_SOCK are set, they override the defaults in the MySQL
+configuration file.
 
 A mailing list has been set up to discuss this and other packages.
 To subscribe, send an email to:
