@@ -6,7 +6,6 @@ CREATE TABLE autoresponder (
   opt_timelimit INT,
   opt_msglimit INT,
   opt_copymsg BOOL,
-  opt_notoline BOOL,
   opt_subject_prefix TEXT
 );
 CREATE UNIQUE INDEX autoresponder_skey ON autoresponder(username,xdom);

@@ -174,8 +174,4 @@ egrep -q '^test subject test test$' stdout
 MSGFILE=big-message.txt ar true  eleven@my.domain '' 'subject: subject test'
 egrep -q '^Thisubject test$' stdout
 
-# Check for operation of "-T" option
-ar true  twelve@my.domain '-T'
-egrep -vq '^To:' stdout
-
 trap - EXIT
