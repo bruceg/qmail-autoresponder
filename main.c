@@ -14,7 +14,6 @@ int opt_quiet = 0;
 int opt_copymsg = 0;
 int opt_nodelete = 0;
 int opt_nosend = 0;
-int opt_notoline = 0;
 int opt_no_inreplyto = 0;
 time_t opt_timelimit = 3600;
 unsigned opt_msglimit = 1;
@@ -165,7 +164,7 @@ static void parse_headers(void)
     ignore("Header of received message was too long");
 }
 
-static void exec_qmail_inject(const char* sender, int fd)
+static void exec_qmail_inject(int fd)
 {
   putenv("QMAILNAME=");
   putenv("QMAILUSER=");
@@ -174,11 +173,11 @@ static void exec_qmail_inject(const char* sender, int fd)
   dup2(fd, 0);
   close(fd);
   execl("/var/qmail/bin/qmail-inject", "/var/qmail/bin/qmail-inject",
-	"-a", "-f", "", sender, 0);
+	"-h", "-f", "", 0);
   fail_temp("Could not exec qmail-inject");
 }
 
-static int popen_inject(const char* sender)
+static int popen_inject()
 {
   int fds[2];
   if(pipe(fds) == -1)
@@ -191,7 +190,7 @@ static int popen_inject(const char* sender)
     break;
   case 0:
     close(fds[1]);
-    exec_qmail_inject(sender, fds[0]);
+    exec_qmail_inject(fds[0]);
     break;
   }
   close(fds[0]);
@@ -257,7 +256,6 @@ static const char* usage_str =
   -q       Don't show error messages
   -D       Don't remove old response records
   -N       Don't send, just send autoresponse to standard output
-  -T       Don't add a 'To: <SENDER>' line to the response
   If more than NUM messages are received from the same sender
   within TIME seconds of each other, no response is sent.
   This program must be run by qmail.
@@ -276,7 +274,7 @@ static void parse_args(int argc, char* argv[])
   char* ptr;
   int ch;
   argv0 = argv[0];
-  while((ch = getopt(argc, argv, "cn:qs:t:DNT")) != EOF) {
+  while((ch = getopt(argc, argv, "cn:qs:t:DN")) != EOF) {
     switch(ch) {
     case 'c': opt_copymsg = 1; break;
     case 'n':
@@ -293,7 +291,6 @@ static void parse_args(int argc, char* argv[])
       break;
     case 'D': opt_nodelete = 1;  break;
     case 'N': opt_nosend = 1;    break;
-    case 'T': opt_notoline = 1;  break;
     default:
       usage(0);
     }
@@ -331,15 +328,13 @@ int main(int argc, char* argv[])
   if(opt_nosend)
     out = &outbuf;
   else {
-    int fd = popen_inject(sender);
+    int fd = popen_inject();
     if (!obuf_init(&bufout, fd, 0, IOBUF_NEEDSCLOSE, 0))
       fail_temp("Could not initialize output buffer.");
     out = &bufout;
   }
   
-  obuf_puts(out, dtline);
-  if(!opt_notoline)
-    obuf_put3s(out, "To: <", sender, ">\n");
+  obuf_put4s(out, dtline, "To: <", sender, ">\n");
   if(opt_subject_prefix)
     obuf_put4s(out, "Subject: ", opt_subject_prefix, subject, "\n");
   if((!opt_no_inreplyto) && (message_id_len != 0))

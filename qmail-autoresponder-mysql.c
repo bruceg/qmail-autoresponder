@@ -1,7 +1,7 @@
 #include <mysql/mysql.h>
 #include <stdlib.h>
 #include <string.h>
-#include "str/str.h"
+#include <str/str.h>
 #include "qmail-autoresponder.h"
 
 const char usage_args[] = "USERNAME DOMAIN";
@@ -51,7 +51,7 @@ void init_autoresponder(int argc, char** argv)
   str_copys(&query,
 	    "SELECT id,response,"
 	    "       opt_timelimit,opt_msglimit,"
-	    "       opt_copymsg,opt_notoline,opt_subject_prefix "
+	    "       opt_copymsg,opt_subject_prefix "
 	    "FROM autoresponder "
 	    "WHERE username=");
   str_cats_quoted(&query, username);
@@ -72,8 +72,7 @@ void init_autoresponder(int argc, char** argv)
     if (row[2]) opt_timelimit = atol(row[2]);
     if (row[3]) opt_msglimit = atol(row[3]);
     if (row[4]) opt_copymsg = atol(row[4]) != 0;
-    if (row[5]) opt_notoline = atol(row[5]) != 0;
-    if (row[6]) opt_subject_prefix = strdup(row[6]);
+    if (row[5]) opt_subject_prefix = strdup(row[5]);
     mysql_free_result(result);
   }
 }

@@ -4,6 +4,9 @@ Changes in version 0.96
 - Added code to use MySQL instead of files for all the autoresponse
   data.
 
+- Removed the option to omit the "To:" header, to allow for copying the
+  response to extra addresses by adding BCCs to the message.
+
 Development of this version has been sponsored by FutureQuest, Inc.
 ossi@FutureQuest.net  http://www.FutureQuest.net/
 -------------------------------------------------------------------------------
