@@ -1,0 +1,31 @@
+Top-level procedure:
+--------------------
+- Lookup SENDER
+- Don't respond if:
+  - SENDER is not set
+  - SENDER is <>
+  - SENDER is <#@[]>
+  - SENDER starts with "mailer-daemon"
+  - SENDER contains no "@"
+- Check SENDER rate
+  - Don't respond if:
+    - SENDER exceded the rate limit (defaults to 1 message every hour)
+- Read in header
+- Don't respond if:
+  - header "List-ID:" (as per rfc 2369)
+  - header "Mailing-List:"
+  - header "X-Mailing-List:"
+  - header "X-ML-Name:"
+  - header "Precedence:" value junk, bulk, or list
+  - my own "Delivered-To:" header
+- Start inject process to sender
+- Copy autoresponse message to sender
+
+Check SENDER rate (directory method)
+------------------------------------
+- For each entry in directory listing:
+  - split filename into TIMESTAMP, PID, ADDRESS parts
+  - ignore filenames that don't fit
+  - if (NOW-TIMESTAMP) < INTERVAL: remove file and ignore
+  - if ADDRESS <> SENDER: ignore file
+  - add one to RATE
