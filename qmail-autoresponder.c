@@ -254,7 +254,6 @@ void parse_write_block(int fdout, const char* buf, size_t len)
     ssize_t incr;
     char* next;
     if(saw_percent) {
-      write(2, "Delayed percent\n", 16);
       saw_percent = 0;
       switch(*buf) {
       case 'S':
