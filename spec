@@ -27,7 +27,7 @@ mkdir -p %{buildroot}%{_bindir}
 mkdir -p %{buildroot}%{_mandir}/man1
 echo %{buildroot}%{_bindir} >conf-bin
 echo %{buildroot}%{_mandir} >conf-man
-rm -f conf_bin.c conf_man.c insthier.c installer instcheck
+rm -f conf_bin.c conf_man.c insthier.o installer instcheck
 make installer instcheck
 ./installer
 ./instcheck
