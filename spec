@@ -25,8 +25,8 @@ responses from qmail, based entirely on a MySQL database.
 %setup
 
 %build
-echo gcc "%{optflags}"
-echo gcc -s "%{optflags}"
+echo gcc "%{optflags}" >conf-cc
+echo gcc -s "%{optflags}" >conf-ld
 make
 
 %install
