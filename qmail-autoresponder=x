@@ -1,2 +1,4 @@
 main.o
+iobuf/iobuf.a
 str/str.a
+iopoll.o

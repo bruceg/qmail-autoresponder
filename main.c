@@ -5,6 +5,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include "iobuf/iobuf.h"
 #include "systime.h"
 #include "fork.h"
 #include "qmail-autoresponder.h"
@@ -197,10 +198,9 @@ static int popen_inject(const char* sender)
   return fds[1];
 }
 
-static void pclose_inject(int fdout)
+static void pclose_inject(void)
 {
   int status;
-  close(fdout);
   if(waitpid(inject_pid, &status, WUNTRACED) == -1)
     fail_temp("Failed to catch exit status of qmail-inject");
   if(!WIFEXITED(status))
@@ -209,7 +209,7 @@ static void pclose_inject(int fdout)
     fail_temp("qmail-inject failed");
 }
 
-static void write_response(int fdout)
+static void write_response(obuf* out)
 {
   const char* next;
   const char* buf = response.s;
@@ -218,41 +218,34 @@ static void write_response(int fdout)
   while (len > 0 && (next = memchr(buf, '%', len)) != 0) {
     long todo;
     todo = next-buf;
-    if (write(fdout, buf, todo) != todo)
-      fail_temp("Could not write to output in write_response");
+    obuf_write(out, buf, todo);
     len -= todo;
     buf += todo;
     if (len > 1) {
       ++buf; --len;
       switch (*buf) {
       case 'S':
-	if (write(fdout, subject, subject_len) != subject_len)
-	  fail_temp("Could not write subject in write_response");
+	obuf_puts(out, subject);
 	++buf; --len;
 	break;
       default:
-	write(fdout, "%", 1);
+	obuf_putc(out, '%');
       }
     }
     else
       break;
   }
   if (len > 0)
-    if (write(fdout, buf, len) != len)
-      fail_temp("Could not write to output in write_response");
+    obuf_write(out, buf, len);
 }
     
-static void copy_input(int fdout)
+static void copy_input(obuf* out)
 {
-  ssize_t rd;
+  long rd;
   char buf[4096];
-  if(write(fdout, header, headersize) != headersize)
-    fail_temp("Could not write header in copy_input");
-  while((rd = read(0, buf, 4096)) > 0) {
-    ssize_t wr = write(fdout, buf, rd);
-    if(wr != rd)
-      fail_temp("Could not write to output in copy_input");
-  }
+  obuf_write(out, header, headersize);
+  while ((rd = read(0, buf, 4096)) > 0)
+    obuf_write(out, buf, rd);
 }
 
 static const char* usage_str =
@@ -311,7 +304,8 @@ static void parse_args(int argc, char* argv[])
 
 int main(int argc, char* argv[])
 {
-  int fdout;
+  obuf bufout;
+  obuf* out;
   const char* sender;
   
   parse_args(argc, argv);
@@ -335,37 +329,32 @@ int main(int argc, char* argv[])
     ignore("SENDER has sent too many messages");
 
   if(opt_nosend)
-    fdout = 1;
-  else
-    fdout = popen_inject(sender);
+    out = &outbuf;
+  else {
+    int fd = popen_inject(sender);
+    if (!obuf_init(&bufout, fd, 0, IOBUF_NEEDSCLOSE, 0))
+      fail_temp("Could not initialize output buffer.");
+    out = &bufout;
+  }
+  
+  obuf_puts(out, dtline);
+  if(!opt_notoline)
+    obuf_put3s(out, "To: <", sender, ">\n");
+  if(opt_subject_prefix)
+    obuf_put4s(out, "Subject: ", opt_subject_prefix, subject, "\n");
+  if((!opt_no_inreplyto) && (message_id_len != 0))
+    obuf_put3s(out, "In-Reply-To: ", message_id, "\n");
 
-  write(fdout, dtline, strlen(dtline));
-  if(!opt_notoline) {
-    write(fdout, "To: <", 5);
-    write(fdout, sender, strlen(sender));
-    write(fdout, ">\n", 2);
-  }
-  if(opt_subject_prefix) {
-    write(fdout, "Subject: ", 9);
-    write(fdout, opt_subject_prefix, strlen(opt_subject_prefix));
-    write(fdout, subject, subject_len);
-    write(fdout, "\n", 1);
-  }
-  if((!opt_no_inreplyto) && (message_id_len != 0)) {
-    write(fdout, "In-Reply-To: ", 13);
-    write(fdout, message_id, message_id_len);
-    write(fdout, "\n", 1);
-  }
-
-  write_response(fdout);
+  write_response(out);
   
   if(opt_copymsg)
-    copy_input(fdout);
+    copy_input(out);
 
-  if(opt_nosend)
-    close(1);
-  else
-    pclose_inject(fdout);
+  if (!obuf_close(out))
+    fail_temp("Could not close output.");
+  
+  if (!opt_nosend)
+    pclose_inject();
   
   return 0;
 }
