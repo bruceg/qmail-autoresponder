@@ -209,40 +209,34 @@ static void pclose_inject(int fdout)
     fail_temp("qmail-inject failed");
 }
 
-static void parse_write_block(int fdout, const char* buf, size_t len)
+static void parse_write_block(int fdout, const char* buf, long len)
 {
-  static int saw_percent = 0;
-  while(len > 0) {
-    ssize_t todo;
-    ssize_t incr;
-    char* next;
-    if(saw_percent) {
-      saw_percent = 0;
-      switch(*buf) {
+  const char* next;
+  while (len > 0 && (next = memchr(buf, '%', len)) != 0) {
+    long todo;
+    todo = next-buf;
+    if (write(fdout, buf, todo) != todo)
+      fail_temp("Could not write to output in parse_write_block");
+    len -= todo;
+    buf += todo;
+    if (len > 1) {
+      ++buf; --len;
+      switch (*buf) {
       case 'S':
-	if(write(fdout, subject, subject_len) != subject_len)
+	if (write(fdout, subject, subject_len) != subject_len)
 	  fail_temp("Could not write subject in parse_write_block");
-	++buf;
-	--len;
-	continue;
+	++buf; --len;
+	break;
       default:
 	write(fdout, "%", 1);
-	break;
       }
     }
-    next = memchr(buf, '%', len);
-    if(next) {
-      todo = next - buf;
-      incr = todo + 1;
-      saw_percent = 1;
-    }
     else
-      incr = todo = len;
-    if(write(fdout, buf, todo) != todo)
-      fail_temp("Could not write to output in parse_write_block");
-    len -= incr;
-    buf += incr;
+      break;
   }
+  if (len > 0)
+    if (write(fdout, buf, len) != len)
+      fail_temp("Could not write to output in parse_write_block");
 }
     
 static void copy_input(int fdout)
