@@ -28,6 +28,30 @@ static int str_cats_quoted(str* s, const char* p)
   return str_catc(s, '\'');
 }
 
+static MYSQL_RES* do_select(const char* username, const char* domain)
+{
+  MYSQL_RES* result;
+  str_copys(&query,
+	    "SELECT id,response,"
+	    "       opt_timelimit,opt_msglimit,"
+	    "       opt_copymsg,opt_subject_prefix "
+	    "FROM autoresponder "
+	    "WHERE username");
+  if (username) {
+    str_catc(&query, '=');
+    str_cats_quoted(&query, username);
+  }
+  else
+    str_cats(&query, " IS NULL");
+  str_cats(&query, " AND domain=");
+  str_cats_quoted(&query, domain);
+  if (mysql_real_query(&mysql, query.s, query.len))
+    fail_temp("Could not select autoresponder.");
+  if ((result = mysql_store_result(&mysql)) == 0)
+    fail_temp("Error fetching result from database.");
+  return result;
+}
+
 void init_autoresponder(int argc, char** argv)
 {
   const char* username;
@@ -48,21 +72,13 @@ void init_autoresponder(int argc, char** argv)
 			  0, getenv("MYSQL_SOCKET"), 0))
     fail_temp("Could not connect to MySQL");
 
-  str_copys(&query,
-	    "SELECT id,response,"
-	    "       opt_timelimit,opt_msglimit,"
-	    "       opt_copymsg,opt_subject_prefix "
-	    "FROM autoresponder "
-	    "WHERE username=");
-  str_cats_quoted(&query, username);
-  str_cats(&query, " AND domain=");
-  str_cats_quoted(&query, domain);
-  if (mysql_real_query(&mysql, query.s, query.len))
-    fail_temp("Could not select autoresponder.");
-  if ((result = mysql_store_result(&mysql)) == 0)
-    fail_temp("Error fetching result from database.");
-  if (mysql_num_rows(result) == 0)
-    exit(0);
+  result = do_select(username, domain);
+  if (mysql_num_rows(result) == 0) {
+    mysql_free_result(result);
+    result = do_select(NULL, domain);
+    if (mysql_num_rows(result) == 0)
+      exit(0);
+  }
   if ((row = mysql_fetch_row(result)) == 0 ||
       (lengths = mysql_fetch_lengths(result)) == 0)
     fail_temp("Error fetching autoresponder from database.");
