@@ -1,0 +1,12 @@
+PKGURL=http://em.ca/~bruceg/autoresponder/
+#LISTSUB=rpms-subscribe@lists.em.ca
+MAKERPM=true
+NOARCH=
+DOCS="procedure.txt"
+EXTRAS=""
+EXTRAS_VER="ANNOUNCEMENT"
+EXTRAS_DIST=""
+VERSION_BASE=
+REMOTEPATH=bruceg@em.ca:www/autoresponder
+RPMUPLOAD=
+LIST=qmail@list.cr.yp.to

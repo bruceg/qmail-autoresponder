@@ -1,0 +1,22 @@
+#!/bin/sh
+#
+# This script checks for the presence of an autoresponse message, and if
+# present executes the autoresponder.  It is designed for use with
+# vmailmgr, but may work with other virtual user systems that:
+# - set MAILDIR to the (virtual) user's mail directory
+# - create a directory "autoresponse" within the user's mail directory
+# - create a file "message.txt" within the users autoresponse directory
+#
+# To use this autoresponder, copy this file to
+# vmailmgr/vdeliver-postdeliver if it does not already exist.  If it
+# exists, copy this file somewhere accessable and add a call to it to
+# vmailmgr/vdeliver-postdeliver.
+#
+# The autoresponder used here can be found at:
+#	http://www.netmeridian.com/e-huss/autorespond.tar.gz
+#
+
+if test -s $MAILDIR/autoresponse/message.txt
+then
+  autoresponder $MAILDIR/autoresponse/message.txt $MAILDIR/autoresponse
+fi
