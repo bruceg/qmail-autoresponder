@@ -1,4 +1,3 @@
 main.o
--liobuf/iobuf
--lstr/str
--lsysdeps
+./bglibs/iobuf
+./bglibs/str
