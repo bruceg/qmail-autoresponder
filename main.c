@@ -209,14 +209,17 @@ static void pclose_inject(int fdout)
     fail_temp("qmail-inject failed");
 }
 
-static void parse_write_block(int fdout, const char* buf, long len)
+static void write_response(int fdout)
 {
   const char* next;
+  const char* buf = response.s;
+  long len = response.len;
+
   while (len > 0 && (next = memchr(buf, '%', len)) != 0) {
     long todo;
     todo = next-buf;
     if (write(fdout, buf, todo) != todo)
-      fail_temp("Could not write to output in parse_write_block");
+      fail_temp("Could not write to output in write_response");
     len -= todo;
     buf += todo;
     if (len > 1) {
@@ -224,7 +227,7 @@ static void parse_write_block(int fdout, const char* buf, long len)
       switch (*buf) {
       case 'S':
 	if (write(fdout, subject, subject_len) != subject_len)
-	  fail_temp("Could not write subject in parse_write_block");
+	  fail_temp("Could not write subject in write_response");
 	++buf; --len;
 	break;
       default:
@@ -236,7 +239,7 @@ static void parse_write_block(int fdout, const char* buf, long len)
   }
   if (len > 0)
     if (write(fdout, buf, len) != len)
-      fail_temp("Could not write to output in parse_write_block");
+      fail_temp("Could not write to output in write_response");
 }
     
 static void copy_input(int fdout)
@@ -354,7 +357,7 @@ int main(int argc, char* argv[])
     write(fdout, "\n", 1);
   }
 
-  parse_write_block(fdout, response.s, response.len);
+  write_response(fdout);
   
   if(opt_copymsg)
     copy_input(fdout);
