@@ -296,13 +296,15 @@ unsigned count_history(const char* sender)
     if(now-message_time > opt_timelimit) {
       /* too old..ignore errors on unlink */
       unlink(entry->d_name);
-    } else if(strcasecmp(end+1, sender_copy)==0)
-      count++;
-    /* Conserve inodes -- create links when possible */
-    if(!opt_nolinks && !created_file) {
-      if(link(entry->d_name, filename) == -1)
-	fail_temp("Could not create link for sender");
-      created_file = 1;
+    } else {
+      if(strcasecmp(end+1, sender_copy)==0)
+	count++;
+      /* Conserve inodes -- create links when possible */
+      if(!opt_nolinks && !created_file) {
+	if(link(entry->d_name, filename) == -1)
+	  fail_temp("Could not create link for sender");
+	created_file = 1;
+      }
     }
   }
 
