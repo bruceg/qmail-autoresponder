@@ -2,16 +2,18 @@ qmail-autoresponder
 Rate-limited autoresponder for qmail
 Bruce Guenter <bruceg@em.ca>
 Version 0.90
-2000-07-13
+2000-07-14
 
-This program automatically responds to emails
-This package contains a program to notify senders about email that has
-been held in the qmail queue.
+This is a simple program to automatically respond to emails.
+
+It is based on some ideas (but little or no code) from a similar
+autoresponder by Eric Huss <e-huss@netmeridian.com>, and ideas presented
+in the qmail mailing list.
 
 Features:
 - Limits rate of automatic responses (defaults to a maximum of one
   message every hour).
-- Will not respond to nearly every type of mailing list message.
+- Will not respond to nearly every type of mailing list or bulk email.
 - Will not respond to bounce messages or MAILER-DAEMON.
 - Bounces looping messages.
 - Can copy original message into response.
