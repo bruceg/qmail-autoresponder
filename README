@@ -23,12 +23,12 @@ Features:
 
 Usage (file-based):
 
-Put "|qmail-autoresponder MESSAGE_FILE DIRECTORY" into your ".qmail"
-file before other delivery instructions.  MESSAGE_FILE is a
-pre-formatted response, including headers, and DIRECTORY is the
-directory into which rate-limiting information will be stored.  Any
-instance of "%S" in MESSAGE_FILE will be replaced with the original
-subject.
+Put "|qmail-autoresponder DIRECTORY" into your ".qmail" file before
+other delivery instructions.  DIRECTORY is the directory into which
+rate-limiting information will be stored, and is expected to contain a
+"message.txt" file containing a pre-formatted response (including
+headers).  Any instance of "%S" in the message file will be replaced
+with the original subject.
 
 Usage (MySQL):
 
@@ -38,7 +38,10 @@ will be pulled from the MySQL table.  See schema.mysql for a table
 schema.  This program reads MySQL options from the "qmail-autoresponder"
 group.  If $MYSQL_USER, $MYSQL_HOST, $MYSQL_PASS, $MYSQL_DB, or
 $MYSQL_SOCK are set, they override the defaults in the MySQL
-configuration file.
+configuration file.  The parameters "USERNAME" and "DOMAIN" are used as
+keys into the MySQL tables.  DOMAIN may be replaced with "$HOST", and
+USERNAME may be replaced with "$EXT", "$DEFAULT" or "$USER" depending on
+the installation (quoting is required).
 
 A mailing list has been set up to discuss this and other packages.
 To subscribe, send an email to:
