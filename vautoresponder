@@ -18,5 +18,5 @@
 
 if test -s $MAILDIR/autoresponse/message.txt
 then
-  qmail-autoresponder $MAILDIR/autoresponse/message.txt $MAILDIR/autoresponse
+  qmail-autoresponder $MAILDIR/autoresponse
 fi
