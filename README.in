@@ -21,6 +21,15 @@ Features:
 - Can use links in the rate-limiting data directory to limit inode usage
   to a single inode.
 
+A mailing list has been set up to discuss this and other packages.
+To subscribe, send an email to:
+	bgware-subscribe@lists.untroubled.org
+A mailing list archive is available at:
+	http://lists.untroubled.org/?list=bgware
+
+Development versions of @PACKAGE@ are available via Subversion at:
+	svn://bruce-guenter.dyndns.org/@PACKAGE@/trunk
+
 Installation:
 
 - Make sure the latest version of bglibs from
@@ -43,24 +52,24 @@ with the original subject.
 
 Usage (MySQL):
 
-Put "|qmail-autoresponder USERNAME DOMAIN" into your ".qmail" file
+Put "|qmail-autoresponder-mysql USERNAME DOMAIN" into your ".qmail" file
 before other delivery instructions.  All data (including the message)
 will be pulled from the MySQL table.  See schema.mysql for a table
 schema.  This program reads MySQL options from the "qmail-autoresponder"
 group.  If $MYSQL_USER, $MYSQL_HOST, $MYSQL_PASS, $MYSQL_DB, or
-$MYSQL_SOCK are set, they override the defaults in the MySQL
-configuration file.  The parameters "USERNAME" and "DOMAIN" are used as
-keys into the MySQL tables.  DOMAIN may be replaced with "$HOST", and
-USERNAME may be replaced with "$EXT", "$DEFAULT" or "$USER" depending on
-the installation (quoting is required).
+$MYSQL_SOCK are set in the .qmail file, they override the defaults in
+the MySQL configuration file.  The parameters "USERNAME" and "DOMAIN"
+are used as keys into the MySQL tables.  DOMAIN may be replaced with
+"$HOST", and USERNAME may be replaced with "$EXT", "$DEFAULT" or "$USER"
+depending on the installation (quoting is required).
 
 A mailing list has been set up to discuss this and other packages.
 To subscribe, send an email to:
-	bgware-subscribe@lists.em.ca
+	bgware-subscribe@lists.untroubled.org
 A mailing list archive is available at:
-	http://lists.em.ca/?list=bgware
+	http://lists.untroubled.org/?list=bgware
 
-This program is Copyright(C) 2000-2003 Bruce Guenter, and may be copied
+This program is Copyright(C) 2005 Bruce Guenter, and may be copied
 according to the GNU GENERAL PUBLIC LICENSE (GPL) Version 2 or a later
 version.  A copy of this license is included with this package.  This
 package comes with no warranty of any kind.
