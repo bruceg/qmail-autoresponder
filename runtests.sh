@@ -111,7 +111,7 @@ ar() {
     echo "qmail-autoresponder ignored message"
     exit 1
   fi
-  if ! { $succeeds || fgrep -q 'Ignoring message:' stderr } ; then
+  if ! { $succeeds || fgrep -q 'Ignoring message:' stderr; } ; then
     echo "qmail-autoresponder did not ignore message"
     exit 1
   fi
@@ -151,6 +151,12 @@ ar false one@my.domain ''	'list-id: list'
 ar false two@my.domain ''	'mailing-list: list'
 ar false three@my.domain ''	'x-mailing-list: list'
 ar false four@my.domain ''	'x-ml-name: list'
+ar false four@my.domain ''	'list-help: somewhere'
+ar false four@my.domain ''	'list-unsubscribe: somewhere'
+ar false four@my.domain ''	'list-subscribe: somewhere'
+ar false four@my.domain ''	'list-post: somewhere'
+ar false four@my.domain ''	'list-owner: somewhere'
+ar false four@my.domain ''	'list-archive: somewhere'
 ar true  five@my.domain ''	'precedence: other'
 ar false six@my.domain ''	'precedence: junk'
 ar false seven@my.domain ''	'precedence: bulk'
