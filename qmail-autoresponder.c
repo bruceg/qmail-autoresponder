@@ -41,8 +41,10 @@ void init_autoresponder(int argc, char* argv[])
   read_message(opt_msgfilename);
 }
 
-static void create_link(const char* last_filename, const char* filename)
+static void create_link(const char* last_filename, char* filename)
 {
+  int fd;
+  
   /* Conserve inodes -- create links when possible */
   if(last_filename)
     if(link(last_filename, filename) == 0)
@@ -62,7 +64,6 @@ int count_history(const char* sender)
   direntry* entry;
   unsigned count = 0;
   char* filename;
-  int fd;
   size_t sender_len;
   char* sender_copy;
   size_t i;
