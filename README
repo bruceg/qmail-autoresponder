@@ -1,0 +1,30 @@
+qmail-autoresponder
+Rate-limited autoresponder for qmail
+Bruce Guenter <bruceg@em.ca>
+Version 0.90
+2000-07-13
+
+This program automatically responds to emails
+This package contains a program to notify senders about email that has
+been held in the qmail queue.
+
+Features:
+- Limits rate of automatic responses (defaults to a maximum of one
+  message every hour).
+- Will not respond to nearly every type of mailing list message.
+- Will not respond to bounce messages or MAILER-DAEMON.
+- Bounces looping messages.
+- Can copy original message into response.
+- Uses links in the rate-limiting data directory to preserve inodes.
+
+Usage:
+
+Put "|qmail-autoresponder MESSAGE_FILE DIRECTORY" into your ".qmail"
+file before other delivery instructions.  MESSAGE_FILE is a
+pre-formatted response, including headers, and DIRECTORY is the
+directory into which rate-limiting information will be stored.
+
+This program is Copyright(C) 2000 Bruce Guenter, and may be copied
+according to the GNU GENERAL PUBLIC LICENSE (GPL) Version 2 or a later
+version.  A copy of this license is included with this package.  This
+package comes with no warranty of any kind.
