@@ -1,3 +1,5 @@
 main.o
 str/str.a
-mysqlclient.lib
+-L/usr/lib/mysql
+-L/usr/local/lib/mysql
+-lmysqlclient
