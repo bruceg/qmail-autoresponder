@@ -1,13 +1,14 @@
 #include <ctype.h>
-#include <dirent.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <time.h>
 #include <unistd.h>
+#include "direntry.h"
+#include "systime.h"
+#include "fork.h"
 
 static int opt_quiet = 0;
 static int opt_copyinput = 0;
@@ -333,7 +334,7 @@ static void copy_msgfile(int fdin, int fdout)
 static int count_history(const char* sender, unsigned max)
 {
   DIR* dir = opendir(".");
-  struct dirent* entry;
+  direntry* entry;
   unsigned count = 0;
   char* filename;
   int fd;
