@@ -5,6 +5,7 @@ Release: 1
 Copyright: GPL
 Group: Utilities/System
 Source: http://em.ca/~bruceg/@PACKAGE@/%{version}/@PACKAGE@-%{version}.tar.gz
+BuildRequires: bglibs >= 1.005
 BuildRoot: %{_tmppath}/@PACKAGE@-root
 URL: http://em.ca/~bruceg/@PACKAGE@/
 Packager: Bruce Guenter <bruceg@em.ca>
@@ -12,6 +13,13 @@ Packager: Bruce Guenter <bruceg@em.ca>
 %description
 This package contains a program to provide automatic rate limited email
 responses from qmail.
+
+%package mysql
+Summary: MySQL-based Autoresponder for qmail
+Group: Utilities/System
+%description mysql
+This package contains a program to provide automatic rate limited email
+responses from qmail, based entirely on a MySQL database.
 
 %prep
 %setup
@@ -38,6 +46,8 @@ rm -rf %{buildroot}
 %files
 %defattr(-,root,root)
 %doc COPYING README procedure.txt
-%{_bindir}/*
+%{_bindir}/qmail-autoresponder
 %{_mandir}/man*/*
 
+%files mysql
+%{_bindir}/qmail-autoresponder-mysql
