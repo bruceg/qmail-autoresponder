@@ -17,6 +17,7 @@ static int opt_nolinks = 0;
 static int opt_notoline = 0;
 static time_t opt_timelimit = 3600;
 static unsigned opt_maxmsgs = 1;
+static const char* opt_subject_prefix = 0;
 
 static int opt_msgfile;
 static const char* argv0;
@@ -25,6 +26,7 @@ static time_t now;
 static const char* dtline;
 static size_t dtline_len;
 static pid_t inject_pid;
+static const char* subject = " Your mail";
 
 static void fail_msg(const char* msg)
 {
@@ -45,24 +47,27 @@ static void ignore(const char* msg)
   exit(0);
 }
 
+static const char* usage_str =
+"usage: %s [-cqLNT] [-n NUM] [-t TIME] MESSAGE-FILE DIRECTORY
+  -c       Copy message into response
+  -n NUM   Set the maximum number of replies (defaults to 1)
+  -s STR   Add the subject to the autoresponse, prefixed by STR
+  -t TIME  Set the time interval, in seconds (defaults to 1 hour)
+  -q       Don't show error messages
+  -L       Don't try to make links to conserve inodes
+  -N       Don't send, just send autoresponse to standard output
+  -T       Don't add a 'To: <SENDER>' line to the response
+  Temporary files are put into DIRECTORY track senders' rates.
+  If more than NUM messages are received from the same sender
+  within TIME seconds of each other, no response is sent.
+  This program must be run by qmail.
+";
+
 static void usage(const char* msg)
 {
   if(msg)
     fprintf(stderr, "%s: %s\n", argv0, msg);
-  fprintf(stderr,
-	  "usage: %s [-cqLNT] [-n NUM] [-t TIME] MESSAGE-FILE DIRECTORY\n"
-	  "  -c       Copy message into response\n"
-	  "  -n NUM   Set the maximum number of replies (defaults to 1)\n"
-	  "  -t TIME  Set the time interval, in seconds (defaults to 1 hour)\n"
-	  "  -q       Don't show error messages\n"
-	  "  -L       Don't try to make links to conserve inodes\n"
-	  "  -N       Don't send, just send autoresponse to standard output\n"
-	  "  -T       Don't add a 'To: <SENDER>' line to the response\n"
-	  "  Temporary files are put into DIRECTORY track senders' rates.\n"
-	  "  If more than NUM messages are received from the same sender\n"
-	  "  within TIME seconds of each other, no response is sent.\n"
-	  "  This program must be run by qmail.\n",
-	  argv0);
+  fprintf(stderr, usage_str, argv0);
   exit(111);
 }
 
@@ -71,7 +76,7 @@ void parse_args(int argc, char* argv[])
   char* ptr;
   int ch;
   argv0 = argv[0];
-  while((ch = getopt(argc, argv, "cn:qt:LNT")) != EOF) {
+  while((ch = getopt(argc, argv, "cn:qs:t:LNT")) != EOF) {
     switch(ch) {
     case 'c': opt_copyinput = 1; break;
     case 'n':
@@ -80,6 +85,7 @@ void parse_args(int argc, char* argv[])
 	usage("Invalid number for NUL.");
       break;
     case 'q': opt_quiet = 1;   break;
+    case 's': opt_subject_prefix = optarg; break;
     case 't':
       opt_timelimit = strtoul(argv[optind], &ptr, 10);
       if(*ptr)
@@ -124,13 +130,13 @@ void parse_header(const char* str, unsigned length)
 {
   if(!strncasecmp(str, "List-ID:", 8))
     ignore("Message appears to be from a mailing list (List-ID header)");
-  if(!strncasecmp(str, "Mailing-List:", 13))
+  else if(!strncasecmp(str, "Mailing-List:", 13))
     ignore("Message appears to be from a mailing list (Mailing-List header)");
-  if(!strncasecmp(str, "X-Mailing-List:", 15))
+  else if(!strncasecmp(str, "X-Mailing-List:", 15))
     ignore("Message appears to be from a mailing list (X-Mailing-List header)");
-  if(!strncasecmp(str, "X-ML-Name:", 10))
+  else if(!strncasecmp(str, "X-ML-Name:", 10))
     ignore("Message appears to be from a mailing list (X-ML-Name header)");
-  if(!strncasecmp(str, "Precedence:", 11)) {
+  else if(!strncasecmp(str, "Precedence:", 11)) {
     const char* start = str + 11;
     const char* end;
     while(start < str+length && isspace(*start))
@@ -143,53 +149,49 @@ void parse_header(const char* str, unsigned length)
        !strncasecmp(start, "list", end-start))
       ignore("Message has a junk, bulk, or list precedence header");
   }
-  if(!strncasecmp(str, dtline, dtline_len))
+  else if(!strncasecmp(str, dtline, dtline_len))
     ignore("Message already has my Delivered-To line");
+  else if(!strncasecmp(str, "Subject:", 8))
+    subject = str + 8;
 }
 
 void parse_headers(void)
 {
-  const char* ptr = header;
-  const char* headerend = header + sizeof(header);
-
+  char* ptr = header;
+  const char* headerend;
+  const char* start;
+  
   if(lseek(0, 0, SEEK_SET) == -1)
     fail_temp("Could not rewind input message.");
   
-  // Only read in a fixed number of bytes
+  /* Only read in a fixed number of bytes */
   headersize = read(0, header, sizeof(header));
   if(headersize == 0 || headersize == -1)
     fail_temp("Could not read header.");
   
   headerend = header + headersize;
   
-  // Find the start and end of header lines
+  /* Find the start and end of header lines */
+  start = ptr;
   while(ptr < headerend) {
     const char* start = ptr;
-    int eol = 0;
-    
-    // The header ends on an empty line
+
+    /* The headers end with a blank line */
     if(*ptr == '\n')
       break;
-
-    // Find the end of the current header
-    while(++ptr < headerend) {
-      // A newline may signal the end of a header
-      // only if not followed by whitespace.
-      if(*ptr == '\n')
-	eol = 1;
-      else if(eol) {
-	if(isspace(*ptr))
-	  eol = 0;
-	else
+    
+    while(ptr < headerend) {
+      if(*ptr++ == '\n') {
+	if(ptr >= headerend || *ptr == '\n' || !isspace(*ptr)) {
+	  ptr[-1] = 0;
+	  parse_header(start, ptr-start-1);
 	  break;
+	}
       }
     }
-    // Parse complete headers
-    if(eol)
-      parse_header(start, ptr-start);
   }
 
-  // Ignore messages with oversize headers
+  /* Ignore messages with oversize headers */
   if(ptr >= header + sizeof(header))
     ignore("Header of received message was too long");
 }
@@ -360,6 +362,12 @@ int main(int argc, char* argv[])
     write(fdout, "To: <", 5);
     write(fdout, sender, strlen(sender));
     write(fdout, ">\n", 2);
+  }
+  if(opt_subject_prefix) {
+    write(fdout, "Subject: ", 9);
+    write(fdout, opt_subject_prefix, strlen(opt_subject_prefix));
+    write(fdout, subject, strlen(subject));
+    write(fdout, "\n", 1);
   }
   copy_fd(opt_msgfile, fdout);
   close(opt_msgfile);

@@ -1,0 +1,7 @@
+-------------------------------------------------------------------------------
+Changes in version 0.91
+
+- Added an option to insert the original subject into the reply.
+
+- Simplified the header scanning logic.
+-------------------------------------------------------------------------------

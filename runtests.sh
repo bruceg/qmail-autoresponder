@@ -5,7 +5,7 @@ mkdir testdir
 cd testdir
 
 cat >message.txt <<EOF
-Subject: autoresponse
+From: nobody in particular
 
 test
 EOF
@@ -19,11 +19,13 @@ ar() {
   echo "Test SENDER=$SENDER; $@"
   {
     echo 'From: somebody'
+    echo 'Subject: something'
     for line in "$@"
     do
       echo "$line"
     done
-  } | ../qmail-autoresponder -N message.txt . >/dev/null
+  } >tempfile
+  ../qmail-autoresponder -N -s Re: message.txt . <tempfile >stdout 2>stderr
 }
 
 set -e

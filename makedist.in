@@ -1,5 +1,5 @@
 PKGURL=http://em.ca/~bruceg/qmail-autoresponder/
-#LISTSUB=rpms-subscribe@lists.em.ca
+LISTSUB="bgware-subscribe@lists.em.ca"
 MAKERPM=true
 NOARCH=
 DOCS="procedure.txt README"
@@ -9,4 +9,4 @@ EXTRAS_DIST="COPYING"
 VERSION_BASE=
 REMOTEPATH=bruceg@em.ca:www/qmail-autoresponder
 RPMUPLOAD=
-LIST=qmail@list.cr.yp.to
+LIST="qmail@list.cr.yp.to bgware@lists.em.ca"

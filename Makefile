@@ -1,5 +1,5 @@
 PACKAGE = qmail-autoresponder
-VERSION = 0.90
+VERSION = 0.91
 
 CC = gcc
 CFLAGS = -Wall -W -O0 -g
@@ -14,13 +14,14 @@ bindir = $(prefix)/bin
 
 install = /usr/bin/install
 
-SOURCES = qmail-autoresponder.c
 PROGS = qmail-autoresponder
 SCRIPTS = vautoresponder
 
 all: $(PROGS)
 
 qmail-autoresponder: qmail-autoresponder.o
+
+qmail-autoresponder.o: qmail-autoresponder.c
 
 install:
 	$(install) -d $(bindir)
