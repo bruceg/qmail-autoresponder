@@ -317,7 +317,7 @@ unsigned count_history(const char* sender)
     close(fd);
   }
   
-  return count;
+  return count + 1;
 }
 
 int main(int argc, char* argv[])
