@@ -18,8 +18,9 @@ static int opt_no_inreplyto = 0;
 static time_t opt_timelimit = 3600;
 static unsigned opt_maxmsgs = 1;
 static const char* opt_subject_prefix = 0;
-
+static const char* opt_msgfilename = "message.txt";
 static int opt_msgfile;
+
 static const char* argv0;
 
 static time_t now;
@@ -51,7 +52,7 @@ static void ignore(const char* msg)
 }
 
 static const char* usage_str =
-"usage: %s [-cqLNT] [-n NUM] [-s STR] [-t TIME] MESSAGE-FILE DIRECTORY
+"usage: %s [-cqLNT] [-n NUM] [-s STR] [-t TIME] [MESSAGE-FILE] DIRECTORY
   -c       Copy message into response
   -n NUM   Set the maximum number of replies (defaults to 1)
   -s STR   Add the subject to the autoresponse, prefixed by STR
@@ -61,6 +62,7 @@ static const char* usage_str =
   -N       Don't send, just send autoresponse to standard output
   -T       Don't add a 'To: <SENDER>' line to the response
   Temporary files are put into DIRECTORY track senders' rates.
+  MESSAGE-FILE defaults to 'message.txt'.
   If more than NUM messages are received from the same sender
   within TIME seconds of each other, no response is sent.
   This program must be run by qmail.
@@ -101,15 +103,16 @@ static void parse_args(int argc, char* argv[])
       usage(0);
     }
   }
-  if(argc - optind < 2)
-    usage("Too few command-line arguments.");
-  if(argc - optind > 2)
-    usage("Too many command-line arguments.");
-  opt_msgfile = open(argv[optind], O_RDONLY);
-  if(opt_msgfile == -1)
-    usage("Could not open message file.");
-  if(chdir(argv[optind+1]) == -1)
+  switch (argc - optind) {
+  case 0: usage("Too few command-line arguments.");
+  case 1: break;
+  case 2: opt_msgfilename = argv[optind++]; break;
+  default: usage("Too many command-line arguments.");
+  }
+  if(chdir(argv[optind]) == -1)
     usage("Could not change directory to DIRECTORY.");
+  if ((opt_msgfile = open(opt_msgfilename, O_RDONLY)) == -1)
+    usage("Could not open message file.");
   now = time(0);
 }
 
