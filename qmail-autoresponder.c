@@ -3,8 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include "str/str.h"
-#include "direntry.h"
+#include <str/str.h>
+#include <sysdeps.h>
 #include "qmail-autoresponder.h"
 
 const char usage_args[] = "[MESSAGE-FILE] DIRECTORY";

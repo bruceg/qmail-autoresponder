@@ -1,7 +1,7 @@
 #ifndef QMAIL_AUTORESPONDER__H__
 #define QMAIL_AUTORESPONDER__H__
 
-#include "str/str.h"
+#include <str/str.h>
 
 extern int opt_quiet;
 extern int opt_copymsg;

@@ -1,7 +1,7 @@
 main.o
-iobuf/iobuf.a
-str/str.a
-iopoll.o
+-liobuf/iobuf
+-lstr/str
+-lsysdeps
 -L/usr/lib/mysql
 -L/usr/local/lib/mysql
 -lmysqlclient

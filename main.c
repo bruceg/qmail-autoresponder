@@ -5,9 +5,9 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
-#include "iobuf/iobuf.h"
-#include "systime.h"
-#include "fork.h"
+#include <iobuf/iobuf.h>
+#include <systime.h>
+#include <sysdeps.h>
 #include "qmail-autoresponder.h"
 
 int opt_quiet = 0;
