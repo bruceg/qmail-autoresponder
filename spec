@@ -5,7 +5,7 @@ Release: 1
 Copyright: GPL
 Group: Utilities/System
 Source: http://em.ca/~bruceg/@PACKAGE@/%{version}/@PACKAGE@-%{version}.tar.gz
-BuildRoot: /tmp/@PACKAGE@-root
+BuildRoot: %{_tmpdir}/@PACKAGE@-root
 URL: http://em.ca/~bruceg/@PACKAGE@/
 Packager: Bruce Guenter <bruceg@em.ca>
 
@@ -17,17 +17,27 @@ responses from qmail.
 %setup
 
 %build
-make CFLAGS="$RPM_OPT_FLAGS" LDFLAGS="$RPM_OPT_FLAGS -s"
+echo gcc "%{optflags}" >conf-cc
+echo gcc -s "%{optflags}" >conf-ld
+make
 
 %install
-rm -fr $RPM_BUILD_ROOT
-mkdir -p $RPM_BUILD_ROOT
-make install_prefix=$RPM_BUILD_ROOT install
+rm -fr %{buildroot}
+mkdir -p %{buildroot}%{_bindir}
+mkdir -p %{buildroot}%{_mandir}/man1
+echo %{buildroot}%{_bindir} >conf-bin
+echo %{buildroot}%{_mandir} >conf-man
+rm -f installer.o installer instcheck
+make installer instcheck
+./installer
+./instcheck
 
 %clean
-rm -rf $RPM_BUILD_ROOT
+rm -rf %{buildroot}
 
 %files
 %defattr(-,root,root)
 %doc COPYING README procedure.txt
-/usr/bin/*
+%{_bindir}/*
+%{_mandir}/man*/*
+
