@@ -29,14 +29,14 @@ static void read_message(const char* filename)
 
 void init_autoresponder(int argc, char* argv[])
 {
-  int optind = 0;
+  int i = 0;
   switch (argc) {
   case 0: usage("Too few command-line arguments.");
   case 1: break;
-  case 2: opt_msgfilename = argv[optind++]; break;
+  case 2: opt_msgfilename = argv[i++]; break;
   default: usage("Too many command-line arguments.");
   }
-  if(chdir(argv[optind]) == -1)
+  if(chdir(argv[i]) == -1)
     usage("Could not change directory to DIRECTORY.");
   read_message(opt_msgfilename);
 }

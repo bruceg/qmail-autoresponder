@@ -50,10 +50,10 @@ static void ignore(const char* msg)
   exit(0);
 }
 
-static void ignore_ml(const char* str, const char* header)
+static void ignore_ml(const char* s, const char* header)
 {
   unsigned hdrlen = strlen(header);
-  if (strncasecmp(str, header, hdrlen) == 0 && str[hdrlen] == ':') {
+  if (strncasecmp(s, header, hdrlen) == 0 && s[hdrlen] == ':') {
     fail_msg("Ignoring message:");
     fprintf(stderr, "%s: %s (%s header)\n", argv0,
 	    "Message appears to be from a mailing list", header);
@@ -74,47 +74,47 @@ static void check_sender(const char* sender)
     ignore("SENDER was mailer-daemon");
 }
 
-static const char* skip_space(const char* str)
+static const char* skip_space(const char* s)
 {
-  while(*str && isspace(*str))
-    ++str;
-  return str;
+  while(*s && isspace(*s))
+    ++s;
+  return s;
 }
 
 static char header[8192];
 static ssize_t headersize;
 
-static void parse_header(const char* str, unsigned length)
+static void parse_header(const char* s, unsigned length)
 {
-  ignore_ml(str, "List-ID");
-  ignore_ml(str, "Mailing-List");
-  ignore_ml(str, "X-Mailing-List");
-  ignore_ml(str, "X-ML-Name");
-  ignore_ml(str, "List-Help");
-  ignore_ml(str, "List-Unsubscribe");
-  ignore_ml(str, "List-Subscribe");
-  ignore_ml(str, "List-Post");
-  ignore_ml(str, "List-Owner");
-  ignore_ml(str, "List-Archive");
+  ignore_ml(s, "List-ID");
+  ignore_ml(s, "Mailing-List");
+  ignore_ml(s, "X-Mailing-List");
+  ignore_ml(s, "X-ML-Name");
+  ignore_ml(s, "List-Help");
+  ignore_ml(s, "List-Unsubscribe");
+  ignore_ml(s, "List-Subscribe");
+  ignore_ml(s, "List-Post");
+  ignore_ml(s, "List-Owner");
+  ignore_ml(s, "List-Archive");
   
-  if(!strncasecmp(str, "Precedence:", 11)) {
-    const char* start = skip_space(str + 11);
+  if(!strncasecmp(s, "Precedence:", 11)) {
+    const char* start = skip_space(s + 11);
     const char* end = start;
-    while(end < str+length && !isspace(*end))
+    while(end < s+length && !isspace(*end))
       ++end;
     if(!strncasecmp(start, "junk", end-start) ||
        !strncasecmp(start, "bulk", end-start) ||
        !strncasecmp(start, "list", end-start))
       ignore("Message has a junk, bulk, or list precedence header");
   }
-  else if(!strncasecmp(str, dtline, dtline_len-1))
+  else if(!strncasecmp(s, dtline, dtline_len-1))
     ignore("Message already has my Delivered-To line");
-  else if(!strncasecmp(str, "Subject:", 8)) {
-    str_copys(&subject, str+8);
+  else if(!strncasecmp(s, "Subject:", 8)) {
+    str_copys(&subject, s+8);
     str_strip(&subject);
   }
-  else if(!strncasecmp(str, "Message-ID:", 11)) {
-    str_copys(&message_id, skip_space(str+11));
+  else if(!strncasecmp(s, "Message-ID:", 11)) {
+    str_copys(&message_id, skip_space(s+11));
     str_strip(&message_id);
   }
 }
@@ -123,7 +123,6 @@ static void parse_headers(void)
 {
   char* ptr = header;
   const char* headerend;
-  const char* start;
   
   if(lseek(0, 0, SEEK_SET) == -1)
     fail_temp("Could not rewind input message.");
@@ -136,7 +135,6 @@ static void parse_headers(void)
   headerend = header + headersize;
   
   /* Find the start and end of header lines */
-  start = ptr;
   while(ptr < headerend) {
     const char* start = ptr;
 
