@@ -20,6 +20,7 @@ SCRIPTS = vautoresponder
 all: $(PROGS)
 
 qmail-autoresponder: qmail-autoresponder.o
+	$(LD) $(LDFLAGS) -o qmail-autoresponder qmail-autoresponder.o $(LIBS)
 
 qmail-autoresponder.o: qmail-autoresponder.c
 
