@@ -51,6 +51,17 @@ static void ignore(const char* msg)
   exit(0);
 }
 
+static void ignore_ml(const char* str, const char* header)
+{
+  unsigned hdrlen = strlen(header);
+  if (strncasecmp(str, header, hdrlen) == 0 && str[hdrlen] == ':') {
+    fail_msg("Ignoring message:");
+    fprintf(stderr, "%s: %s (%s header)\n", argv0,
+	    "Message appears to be from a mailing list", header);
+    exit(0);
+  }
+}
+
 static const char* usage_str =
 "usage: %s [-cqLNT] [-n NUM] [-s STR] [-t TIME] [MESSAGE-FILE] DIRECTORY
   -c       Copy message into response
@@ -141,15 +152,18 @@ static ssize_t headersize;
 
 static void parse_header(const char* str, unsigned length)
 {
-  if(!strncasecmp(str, "List-ID:", 8))
-    ignore("Message appears to be from a mailing list (List-ID header)");
-  else if(!strncasecmp(str, "Mailing-List:", 13))
-    ignore("Message appears to be from a mailing list (Mailing-List header)");
-  else if(!strncasecmp(str, "X-Mailing-List:", 15))
-    ignore("Message appears to be from a mailing list (X-Mailing-List header)");
-  else if(!strncasecmp(str, "X-ML-Name:", 10))
-    ignore("Message appears to be from a mailing list (X-ML-Name header)");
-  else if(!strncasecmp(str, "Precedence:", 11)) {
+  ignore_ml(str, "List-ID");
+  ignore_ml(str, "Mailing-List");
+  ignore_ml(str, "X-Mailing-List");
+  ignore_ml(str, "X-ML-Name");
+  ignore_ml(str, "List-Help");
+  ignore_ml(str, "List-Unsubscribe");
+  ignore_ml(str, "List-Subscribe");
+  ignore_ml(str, "List-Post");
+  ignore_ml(str, "List-Owner");
+  ignore_ml(str, "List-Archive");
+  
+  if(!strncasecmp(str, "Precedence:", 11)) {
     const char* start = skip_space(str + 11);
     const char* end = start;
     while(end < str+length && !isspace(*end))

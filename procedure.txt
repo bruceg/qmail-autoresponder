@@ -12,10 +12,12 @@ Top-level procedure:
     - SENDER exceded the rate limit (defaults to 1 message every hour)
 - Read in header
 - Don't respond if:
-  - header "List-ID:" (as per rfc 2369)
+  - header "List-ID:" (as per RFC 2919)
   - header "Mailing-List:"
   - header "X-Mailing-List:"
   - header "X-ML-Name:"
+  - header "List-(Help|Unsubscribe|Subscribe|Post|Owner|Archive):"
+    (as per RFC 2369)
   - header "Precedence:" value junk, bulk, or list
   - my own "Delivered-To:" header
 - Start inject process to sender
