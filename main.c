@@ -81,6 +81,24 @@ static const char* skip_space(const char* s)
   return s;
 }
 
+static void header_copy(str* dest, const char* data)
+{
+  unsigned int lf;
+  unsigned int end;
+  str_copys(dest, data);
+  str_strip(dest);
+  /* Replace embeded newlines followed by variable whitespace with a
+   * single space. */
+  while ((lf = str_findfirst(dest, '\n')) < dest->len) {
+    end = lf + 1;
+    while (lf > 0 && isspace(dest->s[lf-1]))
+      --lf;
+    while (end < dest->len && isspace(dest->s[end]))
+      ++end;
+    str_spliceb(dest, lf, end - lf, " ", 1);
+  }
+}
+
 static char header[8192];
 static ssize_t headersize;
 
@@ -109,14 +127,10 @@ static void parse_header(const char* s, unsigned length)
   }
   else if(!strncasecmp(s, dtline, dtline_len-1))
     ignore("Message already has my Delivered-To line");
-  else if(!strncasecmp(s, "Subject:", 8)) {
-    str_copys(&subject, s+8);
-    str_strip(&subject);
-  }
-  else if(!strncasecmp(s, "Message-ID:", 11)) {
-    str_copys(&message_id, skip_space(s+11));
-    str_strip(&message_id);
-  }
+  else if(!strncasecmp(s, "Subject:", 8))
+    header_copy(&subject, s + 8);
+  else if(!strncasecmp(s, "Message-ID:", 11))
+    header_copy(&message_id, s + 11);
 }
 
 static void parse_headers(void)

@@ -1,6 +1,7 @@
 -------------------------------------------------------------------------------
 Changes in version 0.97
 
+- Improved handling of headers split across multiple lines.
 
 Development of this version has been sponsored by FutureQuest, Inc.
 ossi@FutureQuest.net  http://www.FutureQuest.net/
