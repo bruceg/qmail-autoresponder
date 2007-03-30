@@ -2,13 +2,13 @@ Name: @PACKAGE@
 Summary: Autoresponder for qmail
 Version: @VERSION@
 Release: 1
-Copyright: GPL
+License: GPL
 Group: Utilities/System
-Source: http://em.ca/~bruceg/@PACKAGE@/%{version}/@PACKAGE@-%{version}.tar.gz
+Source: http://untroubled.org/@PACKAGE@/archive/@PACKAGE@-%{version}.tar.gz
 BuildRequires: bglibs >= 1.006
 BuildRoot: %{_tmppath}/@PACKAGE@-root
-URL: http://em.ca/~bruceg/@PACKAGE@/
-Packager: Bruce Guenter <bruceg@em.ca>
+URL: http://untroubled.org/@PACKAGE@/
+Packager: Bruce Guenter <bruce@untroubled.org>
 
 %description
 This package contains a program to provide automatic rate limited email
