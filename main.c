@@ -82,21 +82,26 @@ static const char* skip_space(const char* s)
   return s;
 }
 
-static void header_copy(str* dest, const char* data)
+static void header_copy_if(const str* src, str* dest,
+			   const char* prefix, unsigned prefix_len)
 {
   unsigned int lf;
   unsigned int end;
-  str_copys(dest, data);
-  str_strip(dest);
-  /* Replace embeded newlines followed by variable whitespace with a
-   * single space. */
-  while ((lf = str_findfirst(dest, '\n')) < dest->len) {
-    end = lf + 1;
-    while (lf > 0 && isspace(dest->s[lf-1]))
-      --lf;
-    while (end < dest->len && isspace(dest->s[end]))
-      ++end;
-    str_spliceb(dest, lf, end - lf, " ", 1);
+
+  if (src->len > prefix_len
+      && strncasecmp(src->s, prefix, prefix_len) == 0) {
+    str_copyb(dest, src->s + prefix_len, src->len - prefix_len);
+    str_strip(dest);
+    /* Replace embeded newlines followed by variable whitespace with a
+     * single space. */
+    while ((lf = str_findfirst(dest, '\n')) < dest->len) {
+      end = lf + 1;
+      while (lf > 0 && isspace(dest->s[lf-1]))
+	--lf;
+      while (end < dest->len && isspace(dest->s[end]))
+	++end;
+      str_spliceb(dest, lf, end - lf, " ", 1);
+    }
   }
 }
 
@@ -125,10 +130,10 @@ static void parse_header(const str* s)
   }
   else if(!strncasecmp(s->s, dtline, dtline_len-1))
     ignore("Message already has my Delivered-To line");
-  else if(!strncasecmp(s->s, "Subject:", 8))
-    header_copy(&subject, s->s + 8);
-  else if(!strncasecmp(s->s, "Message-ID:", 11))
-    header_copy(&message_id, s->s + 11);
+  else {
+    header_copy_if(s, &subject, "subject:", 8);
+    header_copy_if(s, &message_id, "message-id:", 11);
+  }
 }
 
 static str headers;
