@@ -6,6 +6,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <iobuf/iobuf.h>
+#include <str/iter.h>
 #include <systime.h>
 #include <sysdeps.h>
 #include "qmail-autoresponder.h"
@@ -50,10 +51,10 @@ static void ignore(const char* msg)
   exit(0);
 }
 
-static void ignore_ml(const char* s, const char* header)
+static void ignore_ml(const str* s, const char* header)
 {
   unsigned hdrlen = strlen(header);
-  if (strncasecmp(s, header, hdrlen) == 0 && s[hdrlen] == ':') {
+  if (strncasecmp(s->s, header, hdrlen) == 0 && s->s[hdrlen] == ':') {
     fail_msg("Ignoring message:");
     fprintf(stderr, "%s: %s (%s header)\n", argv0,
 	    "Message appears to be from a mailing list", header);
@@ -99,10 +100,7 @@ static void header_copy(str* dest, const char* data)
   }
 }
 
-static char header[8192];
-static ssize_t headersize;
-
-static void parse_header(const char* s, unsigned length)
+static void parse_header(const str* s)
 {
   ignore_ml(s, "List-ID");
   ignore_ml(s, "Mailing-List");
@@ -115,63 +113,55 @@ static void parse_header(const char* s, unsigned length)
   ignore_ml(s, "List-Owner");
   ignore_ml(s, "List-Archive");
   
-  if(!strncasecmp(s, "Precedence:", 11)) {
-    const char* start = skip_space(s + 11);
+  if(!strncasecmp(s->s, "Precedence:", 11)) {
+    const char* start = skip_space(s->s + 11);
     const char* end = start;
-    while(end < s+length && !isspace(*end))
+    while (end < s->s + s->len && !isspace(*end))
       ++end;
     if(!strncasecmp(start, "junk", end-start) ||
        !strncasecmp(start, "bulk", end-start) ||
        !strncasecmp(start, "list", end-start))
       ignore("Message has a junk, bulk, or list precedence header");
   }
-  else if(!strncasecmp(s, dtline, dtline_len-1))
+  else if(!strncasecmp(s->s, dtline, dtline_len-1))
     ignore("Message already has my Delivered-To line");
-  else if(!strncasecmp(s, "Subject:", 8))
-    header_copy(&subject, s + 8);
-  else if(!strncasecmp(s, "Message-ID:", 11))
-    header_copy(&message_id, s + 11);
+  else if(!strncasecmp(s->s, "Subject:", 8))
+    header_copy(&subject, s->s + 8);
+  else if(!strncasecmp(s->s, "Message-ID:", 11))
+    header_copy(&message_id, s->s + 11);
+}
+
+static str headers;
+
+static void read_headers(void)
+{
+  str line = {0,0,0};
+
+  str_truncate(&headers, 0);
+  while (ibuf_getstr(&inbuf, &line, LF)) {
+    if (line.s[0] == LF)
+      break;
+    str_cat(&headers, &line);
+  }
+  str_free(&line);
 }
 
 static void parse_headers(void)
 {
-  char* ptr = header;
-  const char* headerend;
+  str line = {0,0,0};
+  striter i;
   
-  if(lseek(0, 0, SEEK_SET) == -1)
-    fail_temp("Could not rewind input message.");
-  
-  /* Only read in a fixed number of bytes */
-  headersize = read(0, header, sizeof(header));
-  if(headersize == 0 || headersize == -1)
-    fail_temp("Could not read header.");
-  
-  headerend = header + headersize;
-  
-  /* Find the start and end of header lines */
-  while(ptr < headerend) {
-    const char* start = ptr;
+  striter_loop(&i, &headers, LF) {
+    unsigned next = i.start + i.len + 1;
 
-    /* The headers end with a blank line */
-    if(*ptr == '\n')
-      break;
-    
-    while(ptr < headerend) {
-      if(*ptr++ == '\n') {
-	if(ptr >= headerend || *ptr == '\n' || !isspace(*ptr)) {
-	  char tmp = ptr[-1];
-	  ptr[-1] = 0;
-	  parse_header(start, ptr-start-1);
-	  ptr[-1] = tmp;
-	  break;
-	}
-      }
+    str_catb(&line, headers.s + i.start, i.len + 1);
+
+    if (next >= headers.len
+	|| !isspace(headers.s[next])) {
+      parse_header(&line);
+      str_truncate(&line, 0);
     }
   }
-
-  /* Ignore messages with oversize headers */
-  if(ptr >= header + sizeof(header))
-    ignore("Header of received message was too long");
 }
 
 static void exec_qmail_inject(int fd)
@@ -250,11 +240,8 @@ static void write_response(obuf* out)
     
 static void copy_input(obuf* out)
 {
-  long rd;
-  char buf[4096];
-  obuf_write(out, header, headersize);
-  while ((rd = read(0, buf, 4096)) > 0)
-    obuf_write(out, buf, rd);
+  obuf_write(out, headers.s, headers.len);
+  iobuf_copy(&inbuf, out);
 }
 
 static const char* usage_str =
@@ -329,7 +316,11 @@ int main(int argc, char* argv[])
   check_sender(sender);
 
   str_copys(&subject, "Your mail");
+
   // Read and parse header
+  if(lseek(0, 0, SEEK_SET) == -1)
+    fail_temp("Could not rewind input message.");
+  read_headers();
   parse_headers();
 
   // Check rate that SENDER has sent

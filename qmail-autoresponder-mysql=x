@@ -1,6 +1,5 @@
 main.o
--lbg-iobuf
--lbg-str
+-lbg
 -L/usr/lib/mysql
 -L/usr/local/lib/mysql
 -lmysqlclient

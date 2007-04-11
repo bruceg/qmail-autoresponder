@@ -1,3 +1,2 @@
 main.o
--lbg-iobuf
--lbg-str
+-lbg
