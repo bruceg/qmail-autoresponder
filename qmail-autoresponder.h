@@ -12,6 +12,8 @@ extern int opt_no_inreplyto;
 extern time_t opt_timelimit;
 extern unsigned opt_msglimit;
 extern const char* opt_subject_prefix;
+extern const char* opt_hdrkeep;
+extern const char* opt_hdrstrip;
 
 extern const char* argv0;
 extern time_t now;

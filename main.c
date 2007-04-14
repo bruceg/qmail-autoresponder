@@ -19,6 +19,8 @@ int opt_no_inreplyto = 0;
 time_t opt_timelimit = 3600;
 unsigned opt_msglimit = 1;
 const char* opt_subject_prefix = 0;
+const char* opt_headerkeep = 0;
+const char* opt_headerstrip = 0;
 
 const char* argv0;
 
@@ -105,8 +107,37 @@ static void header_copy_if(const str* src, str* dest,
   }
 }
 
+static int header_test(const str* h, const char* list)
+{
+  const char* colon;
+  size_t len;
+
+  do {
+    len = ((colon = strchr(list, ':')) == 0)
+      ? strlen(list)
+      : (size_t)(colon - list);
+    if (strncasecmp(h->s, list, len) == 0
+	&& h->s[len] == ':')
+      return 1;
+    list = colon + 1;
+  } while (colon != 0);
+  return 0;
+}
+
+static str copyheaders;
+static str headers;
+
 static void parse_header(const str* s)
 {
+  if (opt_copymsg) {
+    if (opt_headerkeep
+	? header_test(s, opt_headerkeep)
+	: opt_headerstrip
+	? !header_test(s, opt_headerstrip)
+	: 1)
+      str_cat(&copyheaders, s);
+  }
+
   ignore_ml(s, "List-ID");
   ignore_ml(s, "Mailing-List");
   ignore_ml(s, "X-Mailing-List");
@@ -135,8 +166,6 @@ static void parse_header(const str* s)
     header_copy_if(s, &message_id, "message-id:", 11);
   }
 }
-
-static str headers;
 
 static void read_headers(void)
 {
@@ -245,21 +274,24 @@ static void write_response(obuf* out)
     
 static void copy_input(obuf* out)
 {
-  obuf_write(out, headers.s, headers.len);
+  obuf_write(out, copyheaders.s, copyheaders.len);
   iobuf_copy(&inbuf, out);
 }
 
 static const char* usage_str =
-"usage: %s [-cqDNT] [-n NUM] [-s STR] [-t TIME] %s\n"
+"usage: %s [-cqDNT] [-H STR] [-h str] [-n NUM] [-s STR] [-t TIME] %s\n"
+" -D       Don't remove old response records\n"
+" -H STR   List of headers to omit copying into the response\n"
+" -N       Don't send, just send autoresponse to standard output\n"
 " -c       Copy message into response\n"
+" -h STR   List of headers to copy into the response, separated by ':'\n"
 " -n NUM   Set the maximum number of replies (defaults to 1)\n"
 " -s STR   Add the subject to the autoresponse, prefixed by STR\n"
 " -t TIME  Set the time interval, in seconds (defaults to 1 hour)\n"
 " -q       Don't show error messages\n"
-" -D       Don't remove old response records\n"
-" -N       Don't send, just send autoresponse to standard output\n"
 " If more than NUM messages are received from the same sender\n"
 " within TIME seconds of each other, no response is sent.\n"
+" If both -h and -H are specified, only -h is used.\n"
 " This program must be run by qmail.\n"
 "%s";
 
@@ -276,9 +308,10 @@ static void parse_args(int argc, char* argv[])
   char* ptr;
   int ch;
   argv0 = argv[0];
-  while((ch = getopt(argc, argv, "cn:qs:t:DN")) != EOF) {
+  while((ch = getopt(argc, argv, "DH:Nch:n:qs:t:")) != EOF) {
     switch(ch) {
     case 'c': opt_copymsg = 1; break;
+    case 'h': opt_headerkeep = optarg; break;
     case 'n':
       opt_msglimit = strtoul(optarg, &ptr, 10);
       if(*ptr)
@@ -292,6 +325,7 @@ static void parse_args(int argc, char* argv[])
 	usage("Invalid number for TIME.");
       break;
     case 'D': opt_nodelete = 1;  break;
+    case 'H': opt_headerstrip = optarg; break;
     case 'N': opt_nosend = 1;    break;
     default:
       usage(0);

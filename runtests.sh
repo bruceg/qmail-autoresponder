@@ -171,7 +171,28 @@ egrep -q '^Subject: Re:subject test$' stdout
 egrep -q '^test subject test test$' stdout
 
 # Check if the parser can handle a "%S" split across buffers
-MSGFILE=big-message.txt ar true  eleven@my.domain '' 'subject: subject test'
+MSGFILE=big-message.txt
+ar true  eleven@my.domain '' 'subject: subject test'
 egrep -q '^Thisubject test$' stdout
+
+# Check if source messages are copied into the response properly
+MSGFILE=message.txt
+ar true 12@my.domain '' 'X-Header: test'
+! egrep -q '^X-Header: test' stdout
+
+ar true 13@my.domain '-c' 'X-Header: test'
+egrep -q '^X-Header: test' stdout
+
+ar true 14@my.domain '-c -h subject:x-header' 'X-Header: test'
+egrep -q '^X-Header: test' stdout
+
+ar true 15@my.domain '-c -h subject' 'X-Header: test'
+! egrep -q '^X-Header: test' stdout
+
+ar true 16@my.domain '-c -H subject:x-header' 'X-Header: test'
+! egrep -q '^X-Header: test' stdout
+
+ar true 17@my.domain '-c -H subject' 'X-Header: test'
+egrep -q '^X-Header: test' stdout
 
 trap - EXIT
