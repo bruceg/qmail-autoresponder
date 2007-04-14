@@ -6,6 +6,10 @@ qmail-autoresponder \- Produce automatic responses with qmail
 [
 .B \-cLNqT
 ] [
+.B -H STR
+] [
+.B -h STR
+] [
 .B -n NUM
 ] [
 .B -s STR
@@ -65,6 +69,22 @@ replies, no response is generated.
 .TP
 .B -c
 Copy the message into the response.
+.TP
+.B -H STR
+If this option is given and
+.B -h
+is not, the headers listed in
+.B STR
+are omitted when copying from the message into the response.  Separate
+header names with a colon.
+.TP
+.B -h STR
+If this option is given, only the headers listed in
+.B STR
+are copied from the message into the response.  Separate header names
+with a colon.  If neither this nor
+.B -H
+are used, all headers are copied.
 .TP
 .B -L
 Create new files (instead of making links) for each recipient file.
