@@ -6,6 +6,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <iobuf/iobuf.h>
+#include <str/str.h>
 #include <str/iter.h>
 #include <systime.h>
 #include <sysdeps.h>
@@ -33,6 +34,7 @@ static size_t dtline_len;
 static pid_t inject_pid;
 static str subject;
 static str message_id;
+static str tmpstr;
 
 void fail_msg(const char* msg)
 {
@@ -169,31 +171,27 @@ static void parse_header(const str* s)
 
 static void read_headers(void)
 {
-  str line = {0,0,0};
-
   str_truncate(&headers, 0);
-  while (ibuf_getstr(&inbuf, &line, LF)) {
-    if (line.s[0] == LF)
+  while (ibuf_getstr(&inbuf, &tmpstr, LF)) {
+    if (tmpstr.s[0] == LF)
       break;
-    str_cat(&headers, &line);
+    str_cat(&headers, &tmpstr);
   }
-  str_free(&line);
 }
 
 static void parse_headers(void)
 {
-  str line = {0,0,0};
   striter i;
   
   striter_loop(&i, &headers, LF) {
     unsigned next = i.start + i.len + 1;
 
-    str_catb(&line, headers.s + i.start, i.len + 1);
+    str_catb(&tmpstr, headers.s + i.start, i.len + 1);
 
     if (next >= headers.len
 	|| !isspace(headers.s[next])) {
-      parse_header(&line);
-      str_truncate(&line, 0);
+      parse_header(&tmpstr);
+      str_truncate(&tmpstr, 0);
     }
   }
 }
