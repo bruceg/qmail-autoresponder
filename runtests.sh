@@ -189,7 +189,7 @@ egrep -q '^X-Header: test' stdout
 ar true 15@my.domain '-c -h subject' 'X-Header: test'
 ! egrep -q '^X-Header: test' stdout
 
-ar true 16@my.domain '-c -H subject:x-header' 'X-Header: test'
+ar true 16@my.domain '-c -H subject:x-h*' 'X-Header: test'
 ! egrep -q '^X-Header: test' stdout
 
 ar true 17@my.domain '-c -H subject' 'X-Header: test'

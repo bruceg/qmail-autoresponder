@@ -76,7 +76,15 @@ If this option is given and
 is not, the headers listed in
 .B STR
 are omitted when copying from the message into the response.  Separate
-header names with a colon.
+header names with a colon.  Header names are treated as patterns, and so
+may contain
+.I *
+to match any string.  For example, the pattern
+.I x-*
+will match the headers
+.I X-DomainKeys:
+and
+.IR X-SpamLevel: .
 .TP
 .B -h STR
 If this option is given, only the headers listed in

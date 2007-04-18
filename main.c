@@ -111,6 +111,7 @@ static void header_copy_if(const str* src, str* dest,
 
 static int header_test(const str* h, const char* list)
 {
+  static str pattern;
   const char* colon;
   size_t len;
 
@@ -118,8 +119,9 @@ static int header_test(const str* h, const char* list)
     len = ((colon = strchr(list, ':')) == 0)
       ? strlen(list)
       : (size_t)(colon - list);
-    if (strncasecmp(h->s, list, len) == 0
-	&& h->s[len] == ':')
+    str_copyb(&pattern, list, len);
+    str_cats(&pattern, ": *");
+    if (str_case_glob(h, &pattern))
       return 1;
     list = colon + 1;
   } while (colon != 0);
