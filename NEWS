@@ -6,6 +6,8 @@ Changes in version 0.97
 
 - Added support for omitting parts of the copied headers.
 
+- Internal MIME headers are now stripped from multipart messages.
+
 Development of this version has been sponsored by FutureQuest, Inc.
 ossi@FutureQuest.net  http://www.FutureQuest.net/
 -------------------------------------------------------------------------------

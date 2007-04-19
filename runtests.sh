@@ -101,6 +101,20 @@ ar() {
     do
       echo "$line"
     done
+    echo 'Content-Type: multipart/alternative; boundary="boundary"'
+    echo
+    echo '--boundary'
+    echo 'Content-Type: text/plain'
+    echo
+    echo 'plain text'
+    echo '--boundary'
+    echo 'Content-Type: text/html'
+    echo
+    echo '<html>HTML</html>'
+    echo '--boundary--'
+    echo 'Content-Type: text/plain'
+    echo
+    echo 'Should not see this'
   } >tempfile
   if ! ../qmail-autoresponder -N $args $MSGFILE . <tempfile >stdout 2>stderr
   then
@@ -182,6 +196,10 @@ ar true 12@my.domain '' 'X-Header: test'
 
 ar true 13@my.domain '-c' 'X-Header: test'
 egrep -q '^X-Header: test' stdout
+egrep -q '^plain text$' stdout
+! egrep -q 'Content-Type: text/plain' stdout
+egrep -q '^<html>HTML</html>$' stdout
+! egrep -q 'Should not see this' stdout
 
 ar true 14@my.domain '-c -h subject:x-header' 'X-Header: test'
 egrep -q '^X-Header: test' stdout

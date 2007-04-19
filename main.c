@@ -34,6 +34,8 @@ static size_t dtline_len;
 static pid_t inject_pid;
 static str subject;
 static str message_id;
+static str content_type;
+static str boundary;
 static str tmpstr;
 
 void fail_msg(const char* msg)
@@ -168,6 +170,7 @@ static void parse_header(const str* s)
   else {
     header_copy_if(s, &subject, "subject:", 8);
     header_copy_if(s, &message_id, "message-id:", 11);
+    header_copy_if(s, &content_type, "content-type:", 13);
   }
 }
 
@@ -178,6 +181,56 @@ static void read_headers(void)
     if (tmpstr.s[0] == LF)
       break;
     str_cat(&headers, &tmpstr);
+  }
+}
+
+static const char* find_field(const char* s, const char* field)
+{
+  int fpos;
+  for (fpos = -1; *s != 0; ++s) {
+    if (isspace(*s) || *s == ';')
+      fpos = 0;
+    else if (fpos >= 0) {
+      if (tolower(*s) != field[fpos])
+        fpos = -1;
+      else if (field[++fpos] == 0) {
+        do { ++s; } while(isspace(*s));
+        if (*s != '=')
+          fpos = -1;
+        else {
+          do { ++s; } while(isspace(*s));
+          return s;
+        }
+      }
+    }
+  }
+  return 0;
+}
+
+static int extract_field(const char* s, const char* field, str* value)
+{
+  char quote;
+  const char* start;
+  const char* end;
+  
+  if ((start = find_field(s, field)) != 0) {
+    if (*start == '"' || *start == '\'')
+      for (quote = *start++, end = start; *end != 0 && *end != quote; ++end)
+	;
+    else
+      for (end = start; *end != 0 && !isspace(*end) && (*end != ';'); ++end)
+	;
+    str_copyb(value, start, end - start);
+    return 1;
+  }
+  return 0;
+}
+
+static void parse_content_type(void)
+{
+  if (str_starts(&content_type, "multipart/")) {
+    if (extract_field(content_type.s + 10, "boundary", &boundary))
+      str_splices(&boundary, 0, 0, "--");
   }
 }
 
@@ -196,6 +249,7 @@ static void parse_headers(void)
       str_truncate(&tmpstr, 0);
     }
   }
+  parse_content_type();
 }
 
 static void exec_qmail_inject(int fd)
@@ -274,8 +328,36 @@ static void write_response(obuf* out)
     
 static void copy_input(obuf* out)
 {
+  int in_headers;
+  
   obuf_write(out, copyheaders.s, copyheaders.len);
-  iobuf_copy(&inbuf, out);
+  if (boundary.len > 0) {
+    while (ibuf_getstr(&inbuf, &tmpstr, LF)) {
+      if (str_start(&tmpstr, &boundary)
+	  && tmpstr.s[boundary.len] == LF)
+	break;
+    }
+    in_headers = 1;
+    while (ibuf_getstr(&inbuf, &tmpstr, LF)) {
+      if (str_start(&tmpstr, &boundary)) {
+	if (tmpstr.s[boundary.len] == LF) {
+	  in_headers = 1;
+	  continue;
+	}
+	else if (memcmp(tmpstr.s + boundary.len, "--\n", 3) == 0)
+	  break;
+      }
+      if (tmpstr.s[0] == LF) {
+	in_headers = 0;
+	obuf_putc(out, LF);
+      }
+      else if (!in_headers)
+	obuf_putstr(out, &tmpstr);
+    }
+  }
+  else {
+    iobuf_copy(&inbuf, out);
+  }
 }
 
 static const char* usage_str =
