@@ -19,6 +19,7 @@ int opt_nosend = 0;
 int opt_no_inreplyto = 0;
 time_t opt_timelimit = 3600;
 unsigned opt_msglimit = 1;
+unsigned opt_numlines = ~0U;
 const char* opt_subject_prefix = 0;
 const char* opt_headerkeep = 0;
 const char* opt_headerstrip = 0;
@@ -351,12 +352,19 @@ static void copy_input(obuf* out)
 	in_headers = 0;
 	obuf_putc(out, LF);
       }
-      else if (!in_headers)
+      else if (!in_headers) {
+	if (opt_numlines-- == 0)
+	  return;
 	obuf_putstr(out, &tmpstr);
+      }
     }
   }
   else {
-    iobuf_copy(&inbuf, out);
+    while (ibuf_getstr(&inbuf, &tmpstr, LF)) {
+      if (opt_numlines-- == 0)
+	return;
+      obuf_putstr(out, &tmpstr);
+    }
   }
 }
 
@@ -367,6 +375,7 @@ static const char* usage_str =
 " -N       Don't send, just send autoresponse to standard output\n"
 " -c       Copy message into response\n"
 " -h STR   List of headers to copy into the response, separated by ':'\n"
+" -l NUM   Limit the number of lines of the message that are copied\n"
 " -n NUM   Set the maximum number of replies (defaults to 1)\n"
 " -s STR   Add the subject to the autoresponse, prefixed by STR\n"
 " -t TIME  Set the time interval, in seconds (defaults to 1 hour)\n"
@@ -390,14 +399,19 @@ static void parse_args(int argc, char* argv[])
   char* ptr;
   int ch;
   argv0 = argv[0];
-  while((ch = getopt(argc, argv, "DH:Nch:n:qs:t:")) != EOF) {
+  while((ch = getopt(argc, argv, "DH:Nch:l:n:qs:t:")) != EOF) {
     switch(ch) {
     case 'c': opt_copymsg = 1; break;
     case 'h': opt_headerkeep = optarg; break;
+    case 'l':
+      opt_numlines = strtoul(optarg, &ptr, 10);
+      if(*ptr)
+	usage("Invalid number of lines.");
+      break;
     case 'n':
       opt_msglimit = strtoul(optarg, &ptr, 10);
       if(*ptr)
-	usage("Invalid number for NUL.");
+	usage("Invalid number for NUM.");
       break;
     case 'q': opt_quiet = 1;   break;
     case 's': opt_subject_prefix = optarg; break;

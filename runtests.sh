@@ -213,4 +213,8 @@ ar true 16@my.domain '-c -H subject:x-h*' 'X-Header: test'
 ar true 17@my.domain '-c -H subject' 'X-Header: test'
 egrep -q '^X-Header: test' stdout
 
+ar true 18@my.domain '-c -l 1'
+egrep -q '^plain text$' stdout
+! egrep -q '^<html>HTML</html>$' stdout
+
 trap - EXIT

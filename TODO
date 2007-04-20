@@ -1,4 +1,8 @@
-- Write a man page!
+- Modify the mysql support to use "SELECT *" and use only the fields
+  that exist
+- Add support to -mysql for header strip/keep
+- Add support for parsing multipart messages
+
 - Split the response generation portion into a seperate program.
 - Add option to limit size of copied message
 - Add option to write out a log file

@@ -99,6 +99,16 @@ Create new files (instead of making links) for each recipient file.
 This uses more inodes, but may be required for filesystems (such as
 Coda) that don't handle links properly.
 .TP
+.B -l NUM
+Copy a maximum of
+.B NUM
+lines from the original message body into the response.  This option is only
+relevant if the
+.B -c
+option is also used.  If not given, all the lines in the original
+message body are copied.  This limit does not impact how many lines of
+the header are copied.
+.TP
 .B -N
 Write the generated response to standard output instead of sending it.
 .TP
