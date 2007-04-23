@@ -8,7 +8,10 @@ CREATE TABLE autoresponder (
   opt_timelimit INT,
   opt_msglimit INT,
   opt_copymsg BOOL,
-  opt_subject_prefix TEXT
+  opt_subject_prefix TINYTEXT,
+  opt_numlines INT,
+  opt_headerkeep TINYTEXT,
+  opt_headerstrip TINYTEXT
 );
 CREATE UNIQUE INDEX autoresponder_skey ON autoresponder(username,domain);
 

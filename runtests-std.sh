@@ -156,16 +156,16 @@ egrep -q '^plain text$' stdout
 egrep -q '^<html>HTML</html>$' stdout
 ! egrep -q 'Should not see this' stdout
 
-ar true mimekeep1@my.domain '-c -h subject:x-header'
+ar true headerkeep2@my.domain '-c -h subject:x-header'
 egrep -q '^X-Header: test' stdout
 
-ar true mimekeep2@my.domain '-c -h subject'
+ar true headerkeep1@my.domain '-c -h subject'
 ! egrep -q '^X-Header: test' stdout
 
-ar true mimestrip1@my.domain '-c -H subject:x-h*'
+ar true headerstrip2@my.domain '-c -H subject:x-h*'
 ! egrep -q '^X-Header: test' stdout
 
-ar true mimestrip2@my.domain '-c -H subject'
+ar true headerstrip1@my.domain '-c -H subject'
 egrep -q '^X-Header: test' stdout
 
 ar true numlines@my.domain '-c -l 1'

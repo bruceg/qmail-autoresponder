@@ -9,11 +9,12 @@ extern int opt_nodelete;
 extern int opt_nosend;
 extern int opt_notoline;
 extern int opt_no_inreplyto;
-extern time_t opt_timelimit;
-extern unsigned opt_msglimit;
+extern unsigned long opt_timelimit;
+extern unsigned long opt_msglimit;
+extern unsigned long opt_numlines;
 extern const char* opt_subject_prefix;
-extern const char* opt_hdrkeep;
-extern const char* opt_hdrstrip;
+extern const char* opt_headerkeep;
+extern const char* opt_headerstrip;
 
 extern const char* argv0;
 extern time_t now;
