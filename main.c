@@ -365,6 +365,7 @@ static const char* usage_str =
 " -D       Don't remove old response records\n"
 " -H STR   List of headers to omit copying into the response\n"
 " -N       Don't send, just send autoresponse to standard output\n"
+" -R       Do not add an In-Reply-To: header to the response\n"
 " -c       Copy message into response\n"
 " -h STR   List of headers to copy into the response, separated by ':'\n"
 " -l NUM   Limit the number of lines of the message that are copied\n"
@@ -391,7 +392,7 @@ static void parse_args(int argc, char* argv[])
   char* ptr;
   int ch;
   argv0 = argv[0];
-  while((ch = getopt(argc, argv, "DH:Nch:l:n:qs:t:")) != EOF) {
+  while((ch = getopt(argc, argv, "DH:NRch:l:n:qs:t:")) != EOF) {
     switch(ch) {
     case 'c': opt_copymsg = 1; break;
     case 'h': opt_headerkeep = optarg; break;
