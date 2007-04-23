@@ -147,29 +147,29 @@ egrep -q '^Thisubject test$' stdout
 # Check if source messages are copied into the response properly
 MSGFILE=message.txt
 ar true nocopy@my.domain ''
-! egrep -q '^X-Header: test' stdout
+not egrep -q '^X-Header: test' stdout
 
 ar true copyall@my.domain '-c'
 egrep -q '^X-Header: test' stdout
 egrep -q '^plain text$' stdout
-! egrep -q 'Content-Type: text/plain' stdout
+not egrep -q 'Content-Type: text/plain' stdout
 egrep -q '^<html>HTML</html>$' stdout
-! egrep -q 'Should not see this' stdout
+not egrep -q 'Should not see this' stdout
 
 ar true headerkeep2@my.domain '-c -h subject:x-header'
 egrep -q '^X-Header: test' stdout
 
 ar true headerkeep1@my.domain '-c -h subject'
-! egrep -q '^X-Header: test' stdout
+not egrep -q '^X-Header: test' stdout
 
 ar true headerstrip2@my.domain '-c -H subject:x-h*'
-! egrep -q '^X-Header: test' stdout
+not egrep -q '^X-Header: test' stdout
 
 ar true headerstrip1@my.domain '-c -H subject'
 egrep -q '^X-Header: test' stdout
 
 ar true numlines@my.domain '-c -l 1'
 egrep -q '^plain text$' stdout
-! egrep -q '^<html>HTML</html>$' stdout
+not egrep -q '^<html>HTML</html>$' stdout
 
 trap - EXIT

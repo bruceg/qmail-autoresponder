@@ -42,27 +42,29 @@ ar true  'me@my.domain' 'opt_timelimit=1'
 
 # Check to make sure option fields are honored
 ar true copymsg0@my.domain 'opt_copymsg=0'
-! egrep -q '^X-Header: test' stdout
+not egrep -q '^X-Header: test' stdout
 
 ar true copymsg1@my.domain 'opt_copymsg=1'
 egrep -q '^X-Header: test' stdout
+egrep -q '^plain text$' stdout
+egrep -q '^<html>HTML</html>$' stdout
 
 ar true headerkeep2@my.domain "opt_headerkeep='subject:x-header'"
 egrep -q '^X-Header: test' stdout
 
 ar true headerkeep1@my.domain "opt_headerkeep='subject'"
-! egrep -q '^X-Header: test' stdout
+not egrep -q '^X-Header: test' stdout
 
 update "opt_headerkeep=NULL"
 
 ar true headerstrip2@my.domain "opt_headerstrip='subject:x-h*'"
-! egrep -q '^X-Header: test' stdout
+not egrep -q '^X-Header: test' stdout
 
 ar true headerstrip1@my.domain "opt_headerstrip='subject:'"
 egrep -q '^X-Header: test' stdout
 
 ar true numlines@my.domain "opt_numlines=1"
 egrep -q '^plain text$' stdout
-! egrep -q '^<html>HTML</html>$' stdout
+not egrep -q '^<html>HTML</html>$' stdout
 
 trap - EXIT

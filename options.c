@@ -4,14 +4,13 @@
 #include <str/str.h>
 #include "qmail-autoresponder.h"
 
-int opt_quiet = 0;
 int opt_copymsg = 0;
-int opt_nodelete = 0;
-int opt_nosend = 0;
 int opt_no_inreplyto = 0;
+
 unsigned long opt_timelimit = 3600;
 unsigned long opt_msglimit = 1;
 unsigned long opt_numlines = ~0UL;
+
 const char* opt_subject_prefix = 0;
 const char* opt_headerkeep = 0;
 const char* opt_headerstrip = 0;
@@ -46,11 +45,14 @@ static void copy_str(void* ptr, const char* value, unsigned int length)
 }
 
 struct option options[] = {
-  { "timelimit", &opt_timelimit, copy_ulong },
-  { "msglimit", &opt_msglimit, copy_ulong },
   { "copymsg", &opt_copymsg, copy_bool },
-  { "subject_prefix", &opt_subject_prefix, copy_str },
+
+  { "msglimit", &opt_msglimit, copy_ulong },
+  { "numlines", &opt_numlines, copy_ulong },
+  { "timelimit", &opt_timelimit, copy_ulong },
+
   { "headerkeep", &opt_headerkeep, copy_str },
   { "headerstrip", &opt_headerstrip, copy_str },
+  { "subject_prefix", &opt_subject_prefix, copy_str },
   { 0, 0, 0 }
 };

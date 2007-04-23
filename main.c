@@ -12,6 +12,10 @@
 #include <sysdeps.h>
 #include "qmail-autoresponder.h"
 
+int opt_nodelete = 0;
+int opt_nosend = 0;
+int opt_quiet = 0;
+
 const char* argv0;
 
 time_t now;

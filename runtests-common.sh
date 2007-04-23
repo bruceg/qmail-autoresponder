@@ -7,6 +7,12 @@ DTLINE="Delivered-To: somebody
 
 export DTLINE
 
+not() {
+  if "$@"; then
+    false;
+  fi
+}
+
 make_message() {
   echo 'From: somebody'
   echo 'Subject: something'
