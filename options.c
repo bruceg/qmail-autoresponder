@@ -46,6 +46,7 @@ static void copy_str(void* ptr, const char* value, unsigned int length)
 
 struct option options[] = {
   { "copymsg", &opt_copymsg, copy_bool },
+  { "no_inreplyto", &opt_no_inreplyto, copy_bool },
 
   { "msglimit", &opt_msglimit, copy_ulong },
   { "numlines", &opt_numlines, copy_ulong },

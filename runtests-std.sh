@@ -98,11 +98,15 @@ ar() {
 ar true  'me@my.domain' ''
 # Check that the response contains the sender in a to: header
 egrep -q '^To: <me@my.domain>$' stdout
+egrep -q '^In-Reply-To: <message.id.123@my.domain>$' stdout
 # Don't send immediately to the same recipient
 ar false 'me@my.domain' ''
 # Should send again after rate limit has expired
 sleep 2
 ar true  'me@my.domain' '-t 1'
+
+ar true 'noinreplyto@my.domain' '-R'
+not egrep -q '^In-Reply-To: <message.id.123@my.domain>$' stdout
 
 # Don't send to empty sender (mail daemon)
 ar false '' ''
@@ -135,13 +139,13 @@ ar false list@my.domain ''	'precedence: list'
 ar false samedt@my.domain ''	'delivered-to: somebody'
 
 # Check that the subject line can get added to response
-ar true  ten@my.domain '-s Re:' 'subject: subject test'
+ar true copysubject@my.domain '-s Re:' 'subject: subject test'
 egrep -q '^Subject: Re:subject test$' stdout
 egrep -q '^test subject test test$' stdout
 
 # Check if the parser can handle a "%S" split across buffers
 MSGFILE=big-message.txt
-ar true  eleven@my.domain '' 'subject: subject test'
+ar true big-msg-subject@my.domain '' 'subject: subject test'
 egrep -q '^Thisubject test$' stdout
 
 # Check if source messages are copied into the response properly

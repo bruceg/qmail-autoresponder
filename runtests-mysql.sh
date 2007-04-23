@@ -34,6 +34,7 @@ ar() {
 ar true  'me@my.domain' ''
 # Check that the response contains the sender in a to: header
 egrep -q '^To: <me@my.domain>$' stdout
+egrep -q '^In-Reply-To: <message.id.123@my.domain>$' stdout
 # Don't send immediately to the same recipient
 ar false 'me@my.domain' ''
 # Should send again after rate limit has expired
@@ -41,6 +42,9 @@ sleep 2
 ar true  'me@my.domain' 'opt_timelimit=1'
 
 # Check to make sure option fields are honored
+ar true 'noinreplyto@my.domain' 'opt_no_inreplyto=1'
+not egrep -q '^In-Reply-To: <message.id.123@my.domain>$' stdout
+
 ar true copymsg0@my.domain 'opt_copymsg=0'
 not egrep -q '^X-Header: test' stdout
 

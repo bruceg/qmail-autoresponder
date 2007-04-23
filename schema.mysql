@@ -8,6 +8,7 @@ CREATE TABLE autoresponder (
   opt_timelimit INT,
   opt_msglimit INT,
   opt_copymsg BOOL,
+  opt_no_inreplyto BOOL,
   opt_subject_prefix TINYTEXT,
   opt_numlines INT,
   opt_headerkeep TINYTEXT,

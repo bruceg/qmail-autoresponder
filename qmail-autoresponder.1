@@ -120,6 +120,16 @@ Set the maximum number of replies per
 .B -q
 Quiet.  Don't show error messages.
 .TP
+.B -R
+Do not add a
+.I In-Reply-To:
+header to the outgoing message.  Normally, if a
+.I Message-Id:
+header is found in the original message,
+.B qmail-autoresponder
+will add the contents of that header to the outgoing message.  This
+allows some email programs to group responses more intelligently.
+.TP
 .B -s STR
 Add a subject line to the response message composed of the prefix
 .I STR

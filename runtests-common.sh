@@ -21,6 +21,7 @@ make_message() {
     echo "$line"
   done
   echo 'Content-Type: multipart/alternative; boundary="boundary"'
+  echo 'Message-Id: <message.id.123@my.domain>'
   echo 'X-Header: test'
   echo
   echo '--boundary'

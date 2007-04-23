@@ -395,6 +395,7 @@ static void parse_args(int argc, char* argv[])
     switch(ch) {
     case 'c': opt_copymsg = 1; break;
     case 'h': opt_headerkeep = optarg; break;
+    case 'R': opt_no_inreplyto = 1; break;
     case 'l':
       opt_numlines = strtoul(optarg, &ptr, 10);
       if(*ptr)
