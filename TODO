@@ -7,6 +7,4 @@
 - Add option to limit size of copied message
 - Add option to write out a log file
 - Add support for an optional "schedule" file
-- Replace all command-line arguments except for DIRECTORY with option
-  files that go into DIRECTORY.
 - Add option to response generation to MIME-encode the copied message.

@@ -95,7 +95,7 @@ ar() {
 }
 
 # Should send response normally
-ar true  'me@my.domain' ''
+ar true 'me@my.domain' ''
 # Check that the response contains the sender in a to: header
 egrep -q '^To: <me@my.domain>$' stdout
 egrep -q '^In-Reply-To: <message.id.123@my.domain>$' stdout
@@ -103,9 +103,17 @@ egrep -q '^In-Reply-To: <message.id.123@my.domain>$' stdout
 ar false 'me@my.domain' ''
 # Should send again after rate limit has expired
 sleep 2
-ar true  'me@my.domain' '-t 1'
+ar true 'me@my.domain' '-t 1'
+
+sleep 2
+echo 1 > timelimit
+ar true 'me@my.domain' ''
 
 ar true 'noinreplyto@my.domain' '-R'
+not egrep -q '^In-Reply-To: <message.id.123@my.domain>$' stdout
+
+echo 1 > no_inreplyto
+ar true 'noinreplyto-file@my.domain' ''
 not egrep -q '^In-Reply-To: <message.id.123@my.domain>$' stdout
 
 # Don't send to empty sender (mail daemon)
@@ -143,6 +151,10 @@ ar true copysubject@my.domain '-s Re:' 'subject: subject test'
 egrep -q '^Subject: Re:subject test$' stdout
 egrep -q '^test subject test test$' stdout
 
+echo Re: > subject_prefix
+ar true subject_prefix-file@my.domain '' 'subject: subject test'
+egrep -q '^Subject: Re:subject test$' stdout
+
 # Check if the parser can handle a "%S" split across buffers
 MSGFILE=big-message.txt
 ar true big-msg-subject@my.domain '' 'subject: subject test'
@@ -160,19 +172,47 @@ not egrep -q 'Content-Type: text/plain' stdout
 egrep -q '^<html>HTML</html>$' stdout
 not egrep -q 'Should not see this' stdout
 
-ar true headerkeep2@my.domain '-c -h subject:x-header'
+echo 1 > copymsg
+ar true copyall-file@my.domain ''
+egrep -q '^plain text$' stdout
+
+ar true headerkeep2@my.domain '-h subject:x-header'
 egrep -q '^X-Header: test' stdout
 
-ar true headerkeep1@my.domain '-c -h subject'
+echo 'subject:x-header' > headerkeep
+ar true headerkeep2-file@my.domain ''
+egrep -q '^X-Header: test' stdout
+rm -f headerkeep
+
+ar true headerkeep1@my.domain '-h subject'
 not egrep -q '^X-Header: test' stdout
 
-ar true headerstrip2@my.domain '-c -H subject:x-h*'
+echo 'subject' > headerkeep
+ar true headerkeep1-file@my.domain ''
+not egrep -q '^X-Header: test' stdout
+rm -f headerkeep
+
+ar true headerstrip2@my.domain '-H subject:x-h*'
 not egrep -q '^X-Header: test' stdout
 
-ar true headerstrip1@my.domain '-c -H subject'
+echo 'subject:x-h*' > headerstrip
+ar true headerstrip2-file@my.domain ''
+not egrep -q '^X-Header: test' stdout
+rm -f headerstrip
+
+ar true headerstrip1@my.domain '-H subject'
 egrep -q '^X-Header: test' stdout
 
-ar true numlines@my.domain '-c -l 1'
+echo 'subject' > headerstrip
+ar true headerstrip1-file@my.domain ''
+egrep -q '^X-Header: test' stdout
+
+ar true numlines@my.domain '-l 1'
+egrep -q '^plain text$' stdout
+not egrep -q '^<html>HTML</html>$' stdout
+
+echo 1 > numlines
+ar true numlines-file@my.domain ''
 egrep -q '^plain text$' stdout
 not egrep -q '^<html>HTML</html>$' stdout
 

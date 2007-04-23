@@ -1,3 +1,4 @@
+#include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -27,6 +28,35 @@ static void read_message(const char* filename)
   close(fd);
 }
 
+static void read_config(void)
+{
+  struct option* option;
+  int fd;
+  char buf[4096];
+  size_t rd;
+  char* end;
+  
+  for (option = options; option->name != 0; ++option) {
+    /* Open and read all option files */
+    if ((fd = open(option->name, O_RDONLY)) == -1) {
+      if (errno == ENOENT)
+	continue;
+      fail_temp("System error opening configuration files.");
+    }
+    if ((rd = read(fd, buf, sizeof buf - 1)) == (size_t)-1)
+      fail_temp("System error reading configuration files.");
+    close(fd);
+    /* Make sure it's NUL terminated and strip off all but the first line. */
+    buf[rd] = 0;
+    if ((end = strchr(buf, '\n')) != 0) {
+      *end = 0;
+      rd = end - buf;
+    }
+    /* Parse the data */
+    option->copyfn(option->ptr, buf, rd);
+  }
+}
+
 void init_autoresponder(int argc, char* argv[])
 {
   int i = 0;
@@ -39,6 +69,7 @@ void init_autoresponder(int argc, char* argv[])
   if(chdir(argv[i]) == -1)
     usage("Could not change directory to DIRECTORY.");
   read_message(opt_msgfilename);
+  read_config();
 }
 
 static void create_link(const char* last_filename, char* filename)

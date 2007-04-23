@@ -11,6 +11,8 @@ Changes in version 0.97
 - Added support for limiting the number of lines copied from the
   original message body.
 
+- Added support for setting autoresponder options through files.
+
 - Added an option to control the generation of the In-Reply-To: header.
 
 Development of this version has been sponsored by FutureQuest, Inc.
