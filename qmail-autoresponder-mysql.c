@@ -32,9 +32,7 @@ static MYSQL_RES* do_select(const char* username, const char* domain)
 {
   MYSQL_RES* result;
   str_copys(&query,
-	    "SELECT id,response,"
-	    "       opt_timelimit,opt_msglimit,"
-	    "       opt_copymsg,opt_subject_prefix "
+	    "SELECT * "
 	    "FROM autoresponder "
 	    "WHERE username");
   if (username) {
@@ -52,6 +50,32 @@ static MYSQL_RES* do_select(const char* username, const char* domain)
   return result;
 }
 
+static void handle_option(const char* name,
+			  const char* value,
+			  unsigned int length)
+{
+  if (strcmp(name, "timelimit") == 0)
+    opt_timelimit = atol(value);
+  else if (strcmp(name, "msglimit") == 0)
+    opt_msglimit = atol(value);
+  else if (strcmp(name, "copymsg") == 0)
+    opt_copymsg = atol(value);
+  else if (strcmp(name, "subject_prefix") == 0)
+    opt_subject_prefix = strdup(value);
+}
+
+static void handle_field(const char* name,
+			 const char* value,
+			 unsigned int length)
+{
+  if (strcmp(name, "id") == 0)
+    autoresponder = atol(value);
+  else if (strcmp(name, "response") == 0)
+    str_copyb(&response, value, length);
+  else if (memcmp(name, "opt_", 4) == 0)
+    handle_option(name + 4, value, length);
+}
+
 void init_autoresponder(int argc, char** argv)
 {
   const char* username;
@@ -59,6 +83,9 @@ void init_autoresponder(int argc, char** argv)
   MYSQL_RES* result;
   MYSQL_ROW row;
   unsigned long* lengths;
+  unsigned int num_fields;
+  unsigned int i;
+  MYSQL_FIELD* fields;
   
   if (argc != 2) usage("Incorrect number of command-line arguments.");
   username = argv[0];
@@ -79,16 +106,16 @@ void init_autoresponder(int argc, char** argv)
     if (mysql_num_rows(result) == 0)
       exit(0);
   }
-  if ((row = mysql_fetch_row(result)) == 0 ||
-      (lengths = mysql_fetch_lengths(result)) == 0)
+
+  if ((num_fields = mysql_num_fields(result)) == 0
+      || (fields = mysql_fetch_fields(result)) == 0
+      || (row = mysql_fetch_row(result)) == 0
+      || (lengths = mysql_fetch_lengths(result)) == 0)
     fail_temp("Error fetching autoresponder from database.");
   else {
-    autoresponder = atol(row[0]);
-    str_copyb(&response, row[1], lengths[1]);
-    if (row[2]) opt_timelimit = atol(row[2]);
-    if (row[3]) opt_msglimit = atol(row[3]);
-    if (row[4]) opt_copymsg = atol(row[4]) != 0;
-    if (row[5]) opt_subject_prefix = strdup(row[5]);
+    for (i = 0; i < num_fields; ++i)
+      if (row[i])
+	handle_field(fields[i].name, row[i], lengths[i]);
     mysql_free_result(result);
   }
 }

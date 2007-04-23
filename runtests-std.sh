@@ -1,8 +1,7 @@
 #!/bin/bash
 
-rm -rf testdir
-mkdir testdir
-cd testdir
+. runtests-common.sh
+export MSGFILE="message.txt"
 
 cat >message.txt <<EOF
 From: nobody in particular
@@ -84,60 +83,16 @@ This is a very long test message with lots of boring contents
 Thi%S
 EOF
 
-export DTLINE="Delivered-To: somebody
-"
-export MSGFILE="message.txt"
-
 ar() {
   succeeds=$1
   export SENDER="$2"
   args="$3"
   shift 3
+
   echo "Test SENDER=$SENDER; $@"
-  {
-    echo 'From: somebody'
-    echo 'Subject: something'
-    for line in "$@"
-    do
-      echo "$line"
-    done
-    echo 'Content-Type: multipart/alternative; boundary="boundary"'
-    echo
-    echo '--boundary'
-    echo 'Content-Type: text/plain'
-    echo
-    echo 'plain text'
-    echo '--boundary'
-    echo 'Content-Type: text/html'
-    echo
-    echo '<html>HTML</html>'
-    echo '--boundary--'
-    echo 'Content-Type: text/plain'
-    echo
-    echo 'Should not see this'
-  } >tempfile
-  if ! ../qmail-autoresponder -N $args $MSGFILE . <tempfile >stdout 2>stderr
-  then
-    echo "qmail-autoresponder failed"
-    exit 1
-  fi
-  if $succeeds && fgrep -q 'Ignoring message:' stderr; then
-    echo "qmail-autoresponder ignored message"
-    exit 1
-  fi
-  if ! { $succeeds || fgrep -q 'Ignoring message:' stderr; } ; then
-    echo "qmail-autoresponder did not ignore message"
-    exit 1
-  fi
+  make_message "$@" >tempfile
+  runqa $succeeds '' "$MSGFILE" . $args
 }
-
-set -e
-
-exitfn() {
-  echo "The last test failed!"
-  exit 1
-}
-trap exitfn EXIT
 
 # Should send response normally
 ar true  'me@my.domain' ''
@@ -161,23 +116,23 @@ ar false 'mailer-daemonx@here' ''
 ar false 'somebody' ''
 
 # Don't send to mailing lists
-ar false one@my.domain ''	'list-id: list'
-ar false two@my.domain ''	'mailing-list: list'
-ar false three@my.domain ''	'x-mailing-list: list'
-ar false four@my.domain ''	'x-ml-name: list'
-ar false four@my.domain ''	'list-help: somewhere'
-ar false four@my.domain ''	'list-unsubscribe: somewhere'
-ar false four@my.domain ''	'list-subscribe: somewhere'
-ar false four@my.domain ''	'list-post: somewhere'
-ar false four@my.domain ''	'list-owner: somewhere'
-ar false four@my.domain ''	'list-archive: somewhere'
-ar true  five@my.domain ''	'precedence: other'
-ar false six@my.domain ''	'precedence: junk'
-ar false seven@my.domain ''	'precedence: bulk'
-ar false eight@my.domain ''	'precedence: list'
+ar false list-id@my.domain ''	'list-id: list'
+ar false mailing-list@my.domain ''	'mailing-list: list'
+ar false x-mailing-list@my.domain ''	'x-mailing-list: list'
+ar false x-ml-name@my.domain ''	'x-ml-name: list'
+ar false list-help@my.domain ''	'list-help: somewhere'
+ar false list-unsubscribe@my.domain ''	'list-unsubscribe: somewhere'
+ar false list-subscribe@my.domain ''	'list-subscribe: somewhere'
+ar false list-post@my.domain ''	'list-post: somewhere'
+ar false list-owner@my.domain ''	'list-owner: somewhere'
+ar false list-archive@my.domain ''	'list-archive: somewhere'
+ar true  other@my.domain ''	'precedence: other'
+ar false junk@my.domain ''	'precedence: junk'
+ar false bulk@my.domain ''	'precedence: bulk'
+ar false list@my.domain ''	'precedence: list'
 
 # Don't send if my DTLINE is in the message
-ar false nine@my.domain ''	'delivered-to: somebody'
+ar false samedt@my.domain ''	'delivered-to: somebody'
 
 # Check that the subject line can get added to response
 ar true  ten@my.domain '-s Re:' 'subject: subject test'
@@ -191,29 +146,29 @@ egrep -q '^Thisubject test$' stdout
 
 # Check if source messages are copied into the response properly
 MSGFILE=message.txt
-ar true 12@my.domain '' 'X-Header: test'
+ar true nocopy@my.domain ''
 ! egrep -q '^X-Header: test' stdout
 
-ar true 13@my.domain '-c' 'X-Header: test'
+ar true copyall@my.domain '-c'
 egrep -q '^X-Header: test' stdout
 egrep -q '^plain text$' stdout
 ! egrep -q 'Content-Type: text/plain' stdout
 egrep -q '^<html>HTML</html>$' stdout
 ! egrep -q 'Should not see this' stdout
 
-ar true 14@my.domain '-c -h subject:x-header' 'X-Header: test'
+ar true mimekeep1@my.domain '-c -h subject:x-header'
 egrep -q '^X-Header: test' stdout
 
-ar true 15@my.domain '-c -h subject' 'X-Header: test'
+ar true mimekeep2@my.domain '-c -h subject'
 ! egrep -q '^X-Header: test' stdout
 
-ar true 16@my.domain '-c -H subject:x-h*' 'X-Header: test'
+ar true mimestrip1@my.domain '-c -H subject:x-h*'
 ! egrep -q '^X-Header: test' stdout
 
-ar true 17@my.domain '-c -H subject' 'X-Header: test'
+ar true mimestrip2@my.domain '-c -H subject'
 egrep -q '^X-Header: test' stdout
 
-ar true 18@my.domain '-c -l 1'
+ar true numlines@my.domain '-c -l 1'
 egrep -q '^plain text$' stdout
 ! egrep -q '^<html>HTML</html>$' stdout
 

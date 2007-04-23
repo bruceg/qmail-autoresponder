@@ -1,14 +1,16 @@
+DROP TABLE IF EXISTS response, autoresponder;
+
 CREATE TABLE autoresponder (
   id INT AUTO_INCREMENT NOT NULL PRIMARY KEY,
-  username VARCHAR(250),
-  domain VARCHAR(250) NOT NULL,
+  username VARCHAR(128),
+  domain VARCHAR(128) NOT NULL,
   response TEXT NOT NULL,
   opt_timelimit INT,
   opt_msglimit INT,
   opt_copymsg BOOL,
   opt_subject_prefix TEXT
 );
-CREATE UNIQUE INDEX autoresponder_skey ON autoresponder(username,xdom);
+CREATE UNIQUE INDEX autoresponder_skey ON autoresponder(username,domain);
 
 CREATE TABLE response (
   autoresponder INT NOT NULL REFERENCES autoresponder(id),
