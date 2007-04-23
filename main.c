@@ -12,18 +12,6 @@
 #include <sysdeps.h>
 #include "qmail-autoresponder.h"
 
-int opt_quiet = 0;
-int opt_copymsg = 0;
-int opt_nodelete = 0;
-int opt_nosend = 0;
-int opt_no_inreplyto = 0;
-unsigned long opt_timelimit = 3600;
-unsigned long opt_msglimit = 1;
-unsigned long opt_numlines = ~0UL;
-const char* opt_subject_prefix = 0;
-const char* opt_headerkeep = 0;
-const char* opt_headerstrip = 0;
-
 const char* argv0;
 
 time_t now;

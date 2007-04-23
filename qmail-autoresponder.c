@@ -95,7 +95,7 @@ int count_history(const char* sender)
     message_time = strtoul(ptr+1, &end, 10);
     if(!end || *end != '.')
       continue;
-    if(now-message_time > opt_timelimit) {
+    if((unsigned long)(now - message_time) > opt_timelimit) {
       /* too old..ignore errors on unlink */
       unlink(entry->d_name);
     } else {

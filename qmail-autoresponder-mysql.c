@@ -50,52 +50,6 @@ static MYSQL_RES* do_select(const char* username, const char* domain)
   return result;
 }
 
-struct option
-{
-  const char* name;
-  void* ptr;
-  void (*copyfn)(void* dest, const char* value, unsigned int length);
-};
-
-static void copy_bool(void* ptr, const char* value, unsigned int length)
-{
-  int* dest = ptr;
-  switch (value[0]) {
-  case '1' ... '9':
-    *dest = 1;
-    break;
-  case '0':
-    *dest = 0;
-    break;
-  }
-  (void)length;
-}
-
-static void copy_ulong(void* ptr, const char* value, unsigned int length)
-{
-  unsigned long* dest = ptr;
-  *dest = strtoul(value, 0, 10);
-  (void)length;
-}
-
-static void copy_str(void* ptr, const char* value, unsigned int length)
-{
-  char** dest = ptr;
-  *dest = malloc(length + 1);
-  memcpy(*dest, value, length);
-  (*dest)[length] = 0;
-}
-
-static struct option options[] = {
-  { "timelimit", &opt_timelimit, copy_ulong },
-  { "msglimit", &opt_msglimit, copy_ulong },
-  { "copymsg", &opt_copymsg, copy_bool },
-  { "subject_prefix", &opt_subject_prefix, copy_str },
-  { "headerkeep", &opt_headerkeep, copy_str },
-  { "headerstrip", &opt_headerstrip, copy_str },
-  { 0, 0, 0 }
-};
-
 static void handle_option(const char* name,
 			  const char* value,
 			  unsigned int length)

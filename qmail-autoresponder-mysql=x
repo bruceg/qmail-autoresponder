@@ -1,4 +1,5 @@
 main.o
+options.o
 -lbg
 -L/usr/lib/mysql
 -L/usr/local/lib/mysql

@@ -16,6 +16,15 @@ extern const char* opt_subject_prefix;
 extern const char* opt_headerkeep;
 extern const char* opt_headerstrip;
 
+struct option
+{
+  const char* name;
+  void* ptr;
+  void (*copyfn)(void* dest, const char* value, unsigned int length);
+};
+
+extern struct option options[];
+
 extern const char* argv0;
 extern time_t now;
 extern str response;
