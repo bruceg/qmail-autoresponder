@@ -97,7 +97,8 @@ int count_history(const char* sender)
       continue;
     if((unsigned long)(now - message_time) > opt_timelimit) {
       /* too old..ignore errors on unlink */
-      unlink(entry->d_name);
+      if (!opt_nodelete)
+	unlink(entry->d_name);
     } else {
       if(strcasecmp(end+1, sender_copy)==0)
 	/* If the user's count is already over the max,
