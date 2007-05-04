@@ -24,6 +24,9 @@ struct option
 };
 
 extern struct option options[];
+extern void handle_option(const char* name,
+			  const char* value,
+			  unsigned int length);
 
 extern const char* argv0;
 extern time_t now;

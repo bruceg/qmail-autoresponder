@@ -20,9 +20,17 @@ static void copy_bool(void* ptr, const char* value, unsigned int length)
   int* dest = ptr;
   switch (value[0]) {
   case '1' ... '9':
+  case 'T':
+  case 't':
+  case 'y':
+  case 'Y':
     *dest = 1;
     break;
   case '0':
+  case 'F':
+  case 'f':
+  case 'N':
+  case 'n':
     *dest = 0;
     break;
   }
@@ -57,3 +65,16 @@ struct option options[] = {
   { "subject_prefix", &opt_subject_prefix, copy_str },
   { 0, 0, 0 }
 };
+
+void handle_option(const char* name,
+		   const char* value,
+		   unsigned int length)
+{
+  struct option* option;
+  for (option = options; option->name != 0; ++option) {
+    if (strcmp(name, option->name) == 0) {
+      option->copyfn(option->ptr, value, length);
+      break;
+    }
+  }
+}

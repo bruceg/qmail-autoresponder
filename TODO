@@ -1,6 +1,4 @@
-- Modify the mysql support to use "SELECT *" and use only the fields
-  that exist
-- Add support to -mysql for header strip/keep
+- Figure out some way to output multipart/mixed messages?
 - Add support for parsing multipart messages
 
 - Split the response generation portion into a seperate program.

@@ -106,10 +106,13 @@ sleep 2
 ar true 'me@my.domain' '-t 1'
 
 sleep 2
+ar true 'me@my.domain' '-O timelimit=1'
+
+sleep 2
 echo 1 > timelimit
 ar true 'me@my.domain' ''
 
-ar true 'noinreplyto@my.domain' '-R'
+ar true 'noinreplyto@my.domain' '-O no_inreplyto'
 not egrep -q '^In-Reply-To: <message.id.123@my.domain>$' stdout
 
 echo 1 > no_inreplyto
@@ -151,6 +154,9 @@ ar true copysubject@my.domain '-s Re:' 'subject: subject test'
 egrep -q '^Subject: Re:subject test$' stdout
 egrep -q '^test subject test test$' stdout
 
+ar true subject_prefix-opt@my.domain '-O subject_prefix=Re:' 'subject: subject test'
+egrep -q '^Subject: Re:subject test$' stdout
+
 echo Re: > subject_prefix
 ar true subject_prefix-file@my.domain '' 'subject: subject test'
 egrep -q '^Subject: Re:subject test$' stdout
@@ -176,7 +182,7 @@ echo 1 > copymsg
 ar true copyall-file@my.domain ''
 egrep -q '^plain text$' stdout
 
-ar true headerkeep2@my.domain '-h subject:x-header'
+ar true headerkeep2@my.domain '-O headerkeep=subject:x-header'
 egrep -q '^X-Header: test' stdout
 
 echo 'subject:x-header' > headerkeep
@@ -184,7 +190,7 @@ ar true headerkeep2-file@my.domain ''
 egrep -q '^X-Header: test' stdout
 rm -f headerkeep
 
-ar true headerkeep1@my.domain '-h subject'
+ar true headerkeep1@my.domain '-O headerkeep=subject'
 not egrep -q '^X-Header: test' stdout
 
 echo 'subject' > headerkeep
@@ -192,7 +198,7 @@ ar true headerkeep1-file@my.domain ''
 not egrep -q '^X-Header: test' stdout
 rm -f headerkeep
 
-ar true headerstrip2@my.domain '-H subject:x-h*'
+ar true headerstrip2@my.domain '-O headerstrip=subject:x-h*'
 not egrep -q '^X-Header: test' stdout
 
 echo 'subject:x-h*' > headerstrip
@@ -200,14 +206,14 @@ ar true headerstrip2-file@my.domain ''
 not egrep -q '^X-Header: test' stdout
 rm -f headerstrip
 
-ar true headerstrip1@my.domain '-H subject'
+ar true headerstrip1@my.domain '-O headerstrip=subject'
 egrep -q '^X-Header: test' stdout
 
 echo 'subject' > headerstrip
 ar true headerstrip1-file@my.domain ''
 egrep -q '^X-Header: test' stdout
 
-ar true numlines@my.domain '-l 1'
+ar true numlines@my.domain '-O numlines=1'
 egrep -q '^plain text$' stdout
 not egrep -q '^<html>HTML</html>$' stdout
 

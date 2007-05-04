@@ -1,3 +1,4 @@
+.\" $Id$
 .TH qmail-autoresponder 1
 .SH NAME
 qmail-autoresponder \- Produce automatic responses with qmail
@@ -6,9 +7,7 @@ qmail-autoresponder \- Produce automatic responses with qmail
 [
 .B \-cLNqT
 ] [
-.B -H STR
-] [
-.B -h STR
+.BR "-O NAME" [ =VALUE ]
 ] [
 .B -n NUM
 ] [
@@ -16,7 +15,7 @@ qmail-autoresponder \- Produce automatic responses with qmail
 ] [
 .B -t TIME
 ] [
-.B MESSAGE-FILE
+.I MESSAGE-FILE
 ]
 .I DIRECTORY
 .SH DESCRIPTION
@@ -28,7 +27,7 @@ any known mailing list, nor will it respond to either bounces or
 loops.
 .P
 The
-.B MESSAGE-FILE
+.I MESSAGE-FILE
 is used as the response message, and must contain a complete mail
 message including
 .I From:
@@ -36,7 +35,7 @@ and
 .I Subject:
 headers.
 If the
-.B MESSAGE-FILE
+.I MESSAGE-FILE
 argument is not present, it defaults to
 .IR message.txt .
 All occurrences of
@@ -49,7 +48,7 @@ To put a percent sign in the message, write it as
 limits the rate at which it sends responses to each recipient to
 prevent mail flooding or denial-of-service attacks.
 For each response it sends, it creates a file in
-.BR DIRECTORY .
+.IR DIRECTORY .
 The name of that file consists of the process ID of
 .BR qmail-autoresponder ,
 a period, the current UNIX time number, and the envelope sender
@@ -58,26 +57,80 @@ address (with any
 characters replaced with
 .I :
 to prevent creation of files outside of
-.BR DIRECTORY ).
+.IR DIRECTORY ).
 When it receives a message, it scans
-.BR DIRECTORY .
+.IR DIRECTORY .
 Any files that are older than the time interval (see below) are
 deleted and ignored.  If the number of remaining files with the same
 sender address is greater than or equal to the maximum number of
 replies, no response is generated.
 .SH OPTIONS
+.B qmail-autoresponder
+supports options specified on the command line and as files in the
+.I DIRECTORY
+named on the command line.  Option files in the directory override
+options set on the command line.
+.SS "COMMAND LINE"
 .TP
 .B -c
-Copy the message into the response.
+Equivalent to
+.B -O copymsg=1
 .TP
-.B -H STR
+.B -L
+Create new files (instead of making links) for each recipient file.
+This uses more inodes, but may be required for filesystems (such as
+Coda) that don't handle links properly.
+.TP
+.B -N
+Write the generated response to standard output instead of sending it.
+.TP
+.B -n NUM
+Equivalent to
+.B -O msglimit=NUM
+.TP
+.BR "-O NAME" [ =VALUE ]
+Sets named option
+.B NAME
+to
+.BR VALUE .
+If
+.B VALUE is omitted, a value of
+.B 1
+is used.  See below for all the named options.
+.TP
+.B -q
+Quiet.  Don't show error messages.
+.TP
+.B -s STR
+Equivalent to
+.B -O subject_prefix=STR
+.TP
+.B -T
+Do not add a
+.I To: <SENDER>
+line to the response.
+.TP
+.B -t TIME
+Equivalent to
+.B -O timelimit=TIME
+.SS "NAMED OPTIONS"
+.TP
+.B copymsg \fR(boolean)
+Copy the original message into the response.
+.TP
+.B headerkeep \fR(string)
+If this option is given, only the headers listed in the value are copied
+from the message into the response.  Separate header names with a colon.
+If neither this nor
+.B headerstrip
+are used, all headers are copied.
+.TP
+.B headerstrip \fR(string)
 If this option is given and
-.B -h
-is not, the headers listed in
-.B STR
-are omitted when copying from the message into the response.  Separate
-header names with a colon.  Header names are treated as patterns, and so
-may contain
+.B headerkeep
+is not, the headers listed in the value are omitted when copying from
+the message into the response.  Separate header names with a colon.
+Header names are treated as patterns, and so may contain
 .I *
 to match any string.  For example, the pattern
 .I x-*
@@ -86,42 +139,13 @@ will match the headers
 and
 .IR X-SpamLevel: .
 .TP
-.B -h STR
-If this option is given, only the headers listed in
-.B STR
-are copied from the message into the response.  Separate header names
-with a colon.  If neither this nor
-.B -H
-are used, all headers are copied.
-.TP
-.B -L
-Create new files (instead of making links) for each recipient file.
-This uses more inodes, but may be required for filesystems (such as
-Coda) that don't handle links properly.
-.TP
-.B -l NUM
-Copy a maximum of
-.B NUM
-lines from the original message body into the response.  This option is only
-relevant if the
-.B -c
-option is also used.  If not given, all the lines in the original
-message body are copied.  This limit does not impact how many lines of
-the header are copied.
-.TP
-.B -N
-Write the generated response to standard output instead of sending it.
-.TP
-.B -n NUM
+.B msglimit \fR(integer)
 Set the maximum number of replies per
-.B TIME
+.B timelimit
 (defaults to 1).
 .TP
-.B -q
-Quiet.  Don't show error messages.
-.TP
-.B -R
-Do not add a
+.B no_inreplyto \fR(boolean)
+Do not add an
 .I In-Reply-To:
 header to the outgoing message.  Normally, if a
 .I Message-Id:
@@ -130,7 +154,15 @@ header is found in the original message,
 will add the contents of that header to the outgoing message.  This
 allows some email programs to group responses more intelligently.
 .TP
-.B -s STR
+.B numlines \fR(integer)
+Limits the maximum number of lines copied from the original message body
+into the response.  This option is only relevant if the
+.B copymsg
+option is also used.  If not given, all the lines in the original
+message body are copied.  This limit does not impact how many lines of
+the header are copied.
+.TP
+.B subject_prefix \fR(string)
 Add a subject line to the response message composed of the prefix
 .I STR
 followed by the original subject.  This can also be accomplished by
@@ -139,14 +171,8 @@ putting the following line at the start of the message file:
 .EX
 Subject: STR %S
 .EE
-
 .TP
-.B -T
-Do not add a
-.I To: <SENDER>
-line to the response.
-.TP
-.B -t TIME
+.B timelimit \fR(integer)
 Set the interval during which responses are counted (in seconds)
 (defaults to 1 hour).
 .SH RETURN VALUE

@@ -361,14 +361,12 @@ static void copy_input(obuf* out)
 }
 
 static const char* usage_str =
-"usage: %s [-cqDNT] [-H STR] [-h str] [-n NUM] [-s STR] [-t TIME] %s\n"
+"usage: %s [-cqDNT] [-n NUM] [-s STR] [-t TIME] [-O NAME=VALUE] %s\n"
 " -D       Don't remove old response records\n"
-" -H STR   List of headers to omit copying into the response\n"
 " -N       Don't send, just send autoresponse to standard output\n"
-" -R       Do not add an In-Reply-To: header to the response\n"
+" -O N[=V] Set an extended option named N to value V (see below)\n"
+"          If \"V\" is omitted, the value \"1\" (true) is used.\n"
 " -c       Copy message into response\n"
-" -h STR   List of headers to copy into the response, separated by ':'\n"
-" -l NUM   Limit the number of lines of the message that are copied\n"
 " -n NUM   Set the maximum number of replies (defaults to 1)\n"
 " -s STR   Add the subject to the autoresponse, prefixed by STR\n"
 " -t TIME  Set the time interval, in seconds (defaults to 1 hour)\n"
@@ -377,6 +375,18 @@ static const char* usage_str =
 " within TIME seconds of each other, no response is sent.\n"
 " If both -h and -H are specified, only -h is used.\n"
 " This program must be run by qmail.\n"
+"\n"
+"Option names:\n"
+"  copymsg        -- Copy the original message into the generated response\n"
+"  headerkeep     -- List of headers to copy from the original message\n"
+"  headerstrip    -- List of headers to remove from the original message\n"
+"  msglimit       -- Set the maximum number replies per sender\n"
+"  no_inreplyto   -- Do not add an In-Reply-To: header to the response\n"
+"  numlines       -- Number of lines to copy from the original message\n"
+"  subject_prefix -- Add the original subject to the autoresponse with a prefix\n"
+"  timelimit      -- Set the time interval, in seconds\n"
+"Items within a list are seperated by \":\", and may contain wildcards.\n"
+"\n"
 "%s";
 
 void usage(const char* msg)
@@ -392,16 +402,9 @@ static void parse_args(int argc, char* argv[])
   char* ptr;
   int ch;
   argv0 = argv[0];
-  while((ch = getopt(argc, argv, "DH:NRch:l:n:qs:t:")) != EOF) {
+  while((ch = getopt(argc, argv, "DNO:cn:qs:t:")) != EOF) {
     switch(ch) {
     case 'c': opt_copymsg = 1; break;
-    case 'h': opt_headerkeep = optarg; break;
-    case 'R': opt_no_inreplyto = 1; break;
-    case 'l':
-      opt_numlines = strtoul(optarg, &ptr, 10);
-      if(*ptr)
-	usage("Invalid number of lines.");
-      break;
     case 'n':
       opt_msglimit = strtoul(optarg, &ptr, 10);
       if(*ptr)
@@ -415,8 +418,15 @@ static void parse_args(int argc, char* argv[])
 	usage("Invalid number for TIME.");
       break;
     case 'D': opt_nodelete = 1;  break;
-    case 'H': opt_headerstrip = optarg; break;
     case 'N': opt_nosend = 1;    break;
+    case 'O':
+      if ((ptr = strchr(optarg, '=')) == 0)
+	handle_option(optarg, "1", 1);
+      else {
+	*ptr++ = 0;
+	handle_option(optarg, ptr, strlen(ptr));
+      }
+      break;
     default:
       usage(0);
     }

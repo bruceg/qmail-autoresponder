@@ -50,19 +50,6 @@ static MYSQL_RES* do_select(const char* username, const char* domain)
   return result;
 }
 
-static void handle_option(const char* name,
-			  const char* value,
-			  unsigned int length)
-{
-  struct option* option;
-  for (option = options; option->name != 0; ++option) {
-    if (strcmp(name, option->name) == 0) {
-      option->copyfn(option->ptr, value, length);
-      break;
-    }
-  }
-}
-
 static void handle_field(const char* name,
 			 const char* value,
 			 unsigned int length)
