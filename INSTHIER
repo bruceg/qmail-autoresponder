@@ -1,0 +1,6 @@
+>bin
+c:::755::qmail-autoresponder
+c?:::755::qmail-autoresponder-mysql
+
+>man
+c:::644:man1:qmail-autoresponder.1

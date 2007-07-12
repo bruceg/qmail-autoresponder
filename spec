@@ -5,7 +5,7 @@ Release: 1
 License: GPL
 Group: Utilities/System
 Source: http://untroubled.org/@PACKAGE@/archive/@PACKAGE@-%{version}.tar.gz
-BuildRequires: bglibs >= 1.006
+BuildRequires: bglibs >= 1.022
 BuildRoot: %{_tmppath}/@PACKAGE@-root
 URL: http://untroubled.org/@PACKAGE@/
 Packager: Bruce Guenter <bruce@untroubled.org>
@@ -25,20 +25,18 @@ responses from qmail, based entirely on a MySQL database.
 %setup
 
 %build
+echo %{_bindir} >conf-bin
+echo %{_mandir} >conf-man
 echo gcc "%{optflags}" >conf-cc
 echo gcc -s "%{optflags}" >conf-ld
-make
+
+make all mysql
 
 %install
 rm -fr %{buildroot}
 mkdir -p %{buildroot}%{_bindir}
 mkdir -p %{buildroot}%{_mandir}/man1
-echo %{buildroot}%{_bindir} >conf-bin
-echo %{buildroot}%{_mandir} >conf-man
-rm -f conf_bin.c conf_man.c insthier.o installer instcheck
-make installer instcheck
-./installer
-./instcheck
+make install install_prefix=%{buildroot}
 
 %clean
 rm -rf %{buildroot}
