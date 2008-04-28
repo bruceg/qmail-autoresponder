@@ -4,3 +4,4 @@ c?:::755::qmail-autoresponder-mysql
 
 >man
 c:::644:man1:qmail-autoresponder.1
+c:::644:man1:qmail-autoresponder-mysql.1
