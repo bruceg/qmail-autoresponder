@@ -27,7 +27,7 @@ ar() {
   echo "Test SENDER=$SENDER; $update"
 
   make_message >tempfile
-  runqa $succeeds -mysql me my.domain
+  runqa $succeeds -mysql -- me my.domain
 }
 
 # Should send response normally
