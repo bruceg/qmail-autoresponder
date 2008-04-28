@@ -1,0 +1,14 @@
+*.1.html
+*.o
+ANNOUNCEMENT
+AUTOFILES
+ChangeLog
+Makefile
+OldMakefile
+README
+SRCFILES
+TARGETS
+compile
+load
+qmail-autoresponder
+qmail-autoresponder-mysql
