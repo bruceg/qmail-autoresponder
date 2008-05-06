@@ -1,6 +1,8 @@
 -------------------------------------------------------------------------------
 Changes in version 0.97.1
 
+- Add a newline after the response message and after the copied header,
+  to make sure there is at least one blank line between them.
 
 Development of this version has been sponsored by FutureQuest, Inc.
 ossi@FutureQuest.net  http://www.FutureQuest.net/

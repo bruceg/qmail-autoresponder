@@ -323,7 +323,9 @@ static void copy_input(obuf* out)
 {
   int in_headers;
   
+  obuf_write(out, "\n", 1);
   obuf_write(out, copyheaders.s, copyheaders.len);
+  obuf_write(out, "\n", 1);
   if (boundary.len > 0) {
     while (ibuf_getstr(&inbuf, &tmpstr, LF)) {
       if (str_start(&tmpstr, &boundary)
