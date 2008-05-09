@@ -12,7 +12,8 @@ CREATE TABLE autoresponder (
   opt_subject_prefix TINYTEXT,
   opt_numlines INT,
   opt_headerkeep TINYTEXT,
-  opt_headerstrip TINYTEXT
+  opt_headerstrip TINYTEXT,
+  opt_separator TINYTEXT
 );
 CREATE UNIQUE INDEX autoresponder_skey ON autoresponder(username,domain);
 

@@ -323,7 +323,11 @@ static void copy_input(obuf* out)
 {
   int in_headers;
   
-  obuf_write(out, "\n", 1);
+  if (opt_separator) {
+    obuf_write(out, "\n\n", 2);
+    obuf_puts(out, opt_separator);
+  }
+  obuf_write(out, "\n\n", 2);
   obuf_write(out, copyheaders.s, copyheaders.len);
   obuf_write(out, "\n", 1);
   if (boundary.len > 0) {
@@ -385,6 +389,7 @@ static const char* usage_str =
 "  msglimit       -- Set the maximum number replies per sender\n"
 "  no_inreplyto   -- Do not add an In-Reply-To: header to the response\n"
 "  numlines       -- Number of lines to copy from the original message\n"
+"  separator      -- Add a separator between the response and copied message\n"
 "  subject_prefix -- Add the original subject to the autoresponse with a prefix\n"
 "  timelimit      -- Set the time interval, in seconds\n"
 "Items within a list are seperated by \":\", and may contain wildcards.\n"
