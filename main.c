@@ -6,6 +6,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <iobuf/iobuf.h>
+#include <path/path.h>
 #include <str/str.h>
 #include <str/iter.h>
 #include <systime.h>
@@ -25,11 +26,15 @@ str response = {0,0,0};
 static const char* dtline;
 static size_t dtline_len;
 static pid_t inject_pid;
+static pid_t queue_pid;
 static str subject;
 static str message_id;
 static str content_type;
 static str boundary;
 static str tmpstr;
+static int msgfd;
+static int envfd;
+static str envelope;
 
 void fail_msg(const char* msg)
 {
@@ -245,40 +250,76 @@ static void parse_headers(void)
   parse_content_type();
 }
 
-static void exec_qmail_inject(int fd)
+static void exec_qmail(const char *cmd, const char* arg1,
+		       int fd0, int fd1)
 {
-  putenv("QMAILNAME=");
-  putenv("QMAILUSER=");
-  putenv("QMAILHOST=");
-  close(0);
-  dup2(fd, 0);
-  close(fd);
-  execl("/var/qmail/bin/qmail-inject", "/var/qmail/bin/qmail-inject",
-	"-h", "-f", "", 0);
-  fail_temp("Could not exec qmail-inject");
+  const char* argv[] = { cmd, arg1, 0 };
+  dup2(fd0, 0);
+  dup2(fd1, 1);
+  close(fd0);
+  close(fd1);
+  execv(cmd, (char**)argv);
+  fail_temp("Could not exec qmail");
 }
 
-static int popen_inject()
+static void exec_qmail_inject(int fd0, int fd1)
 {
-  int fds[2];
-  if(pipe(fds) == -1)
+  exec_qmail("/var/qmail/bin/qmail-inject", "-n", fd0, fd1);
+}
+
+static void exec_qmail_queue(int fd0, int fd1)
+{
+  exec_qmail("/var/qmail/bin/qmail-queue", 0, fd0, fd1);
+}
+
+static void start_qmail(void)
+{
+  int pipe1[2];			/* Pipe into -inject for the message body */
+  int pipe2[2];			/* Pipe from -inject into -queue */
+  int pipe3[2];			/* Pipe into -queue for the envelope */
+
+  if (pipe(pipe1) == -1
+      || pipe(pipe2) == -1
+      || pipe(pipe3) == -1)
     fail_temp("Could not create pipe");
-  
+
   inject_pid = fork();
-  switch(inject_pid) {
+  switch (inject_pid) {
   case -1:
     fail_temp("Could not fork");
     break;
   case 0:
-    close(fds[1]);
-    exec_qmail_inject(fds[0]);
+    close(pipe1[1]);
+    close(pipe2[0]);
+    close(pipe3[0]);
+    close(pipe3[1]);
+    /* Read from pipe1 and write to pipe2 */
+    exec_qmail_inject(pipe1[0], pipe2[1]);
     break;
   }
-  close(fds[0]);
-  return fds[1];
+  close(pipe1[0]);
+  close(pipe2[1]);
+  msgfd = pipe1[1];
+
+  queue_pid = fork();
+  switch (queue_pid) {
+  case -1:
+    fail_temp("Could not fork");
+    break;
+  case 0:
+    close(pipe1[1]);
+    close(pipe2[1]);
+    close(pipe3[1]);
+    /* Read message from pipe2 and envelope from pipe3 */
+    exec_qmail_queue(pipe2[0], pipe3[0]);
+    break;
+  }
+  close(pipe2[0]);
+  close(pipe3[0]);
+  envfd = pipe3[1];
 }
 
-static void pclose_inject(void)
+static void finish_qmail(void)
 {
   int status;
   if(waitpid(inject_pid, &status, WUNTRACED) == -1)
@@ -287,6 +328,28 @@ static void pclose_inject(void)
     fail_temp("qmail-inject crashed");
   if(WEXITSTATUS(status))
     fail_temp("qmail-inject failed");
+
+  write(envfd, envelope.s, envelope.len);
+  close(envfd);
+
+  if(waitpid(queue_pid, &status, WUNTRACED) == -1)
+    fail_temp("Failed to catch exit status of qmail-queue");
+  if(!WIFEXITED(status))
+    fail_temp("qmail-queue crashed");
+  if(WEXITSTATUS(status))
+    fail_temp("qmail-queue failed");
+
+  fprintf(stderr, "%s: Sent response qp %d\n", argv0, queue_pid);
+}
+
+static void make_envelope(const char* sender)
+{
+  str_catc(&envelope, 'F');
+  str_catc(&envelope, 0);
+  str_catc(&envelope, 'T');
+  str_cats(&envelope, sender);
+  str_catc(&envelope, 0);
+  str_catc(&envelope, 0);
 }
 
 static void write_response(obuf* out)
@@ -473,11 +536,12 @@ int main(int argc, char* argv[])
   if(!count_history(sender))
     ignore("SENDER has sent too many messages");
 
+  make_envelope(sender);
   if(opt_nosend)
     out = &outbuf;
   else {
-    int fd = popen_inject();
-    if (!obuf_init(&bufout, fd, 0, IOBUF_NEEDSCLOSE, 0))
+    start_qmail();
+    if (!obuf_init(&bufout, msgfd, 0, IOBUF_NEEDSCLOSE, 0))
       fail_temp("Could not initialize output buffer.");
     out = &bufout;
   }
@@ -497,7 +561,7 @@ int main(int argc, char* argv[])
     fail_temp("Could not close output.");
   
   if (!opt_nosend)
-    pclose_inject();
+    finish_qmail();
   
   return 0;
 }
