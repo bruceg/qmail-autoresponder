@@ -1,4 +1,5 @@
 main.o
+qmail.o
 options.o
 -lbg
 -L/usr/lib/mysql

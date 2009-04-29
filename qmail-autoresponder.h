@@ -37,6 +37,9 @@ void fail_msg(const char* msg);
 void fail_temp(const char* msg);
 void usage(const char*);
 
+int qmail_start(void);
+void qmail_finish(const char* sender);
+
 /* Defined by the individual modules */
 extern const char usage_args[];
 extern const char usage_post[];

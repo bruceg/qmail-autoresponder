@@ -1,3 +1,4 @@
 main.o
+qmail.o
 options.o
 -lbg
