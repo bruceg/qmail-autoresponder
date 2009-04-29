@@ -1,16 +1,15 @@
+#include <sysdeps.h>
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
-#include <sys/wait.h>
 #include <unistd.h>
 #include <iobuf/iobuf.h>
 #include <path/path.h>
 #include <str/str.h>
 #include <str/iter.h>
 #include <systime.h>
-#include <sysdeps.h>
 #include "qmail-autoresponder.h"
 
 int opt_nodelete = 0;
