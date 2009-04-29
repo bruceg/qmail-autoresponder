@@ -1,7 +1,7 @@
 #ifndef QMAIL_AUTORESPONDER__H__
 #define QMAIL_AUTORESPONDER__H__
 
-#include <str/str.h>
+struct str;
 
 extern int opt_quiet;
 extern int opt_copymsg;
@@ -31,7 +31,7 @@ extern void handle_option(const char* name,
 
 extern const char* argv0;
 extern time_t now;
-extern str response;
+extern struct str response;
 
 void fail_msg(const char* msg);
 void fail_temp(const char* msg);
