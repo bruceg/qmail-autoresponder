@@ -127,5 +127,6 @@ void qmail_finish(const char* sender)
   if(WEXITSTATUS(status))
     fail_temp("qmail-queue failed");
 
-  fprintf(stderr, "%s: Sent response qp %d\n", argv0, queue_pid);
+  if (!opt_quiet)
+    fprintf(stderr, "%s: Sent response qp %d\n", argv0, queue_pid);
 }
