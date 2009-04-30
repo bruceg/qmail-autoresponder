@@ -16,6 +16,7 @@ extern const char* opt_subject_prefix;
 extern const char* opt_headerkeep;
 extern const char* opt_headerstrip;
 extern const char* opt_separator;
+extern const char* opt_bcc;
 
 struct option
 {

@@ -83,14 +83,26 @@ int qmail_start(void)
 
 static void write_envelope(const char* sender)
 {
-  const size_t senderlen = strlen(sender);
-  char envelope[5 + senderlen];
+  const size_t senderlen = strlen(sender) + 1;
+  const size_t bcclen = (opt_bcc == 0) ? 0 : strlen(opt_bcc) + 1;
+  char envelope[5 + senderlen + bcclen];
+  char* ptr;
 
-  memcpy(envelope, "F\0T", 3);
-  memcpy(envelope+3, sender, senderlen+1);
-  envelope[3+senderlen+1] = 0;
+  ptr = envelope;
+  *ptr++ = 'F';
+  *ptr++ = 0;
+  *ptr++ = 'T';
+  memcpy(ptr, sender, senderlen);
+  ptr += senderlen;
 
-  write(envfd, envelope, sizeof envelope);
+  if (bcclen > 0) {
+    *ptr++ = 'T';
+    memcpy(ptr, opt_bcc, bcclen);
+    ptr += bcclen;
+  }
+  *ptr++ = 0;
+
+  write(envfd, envelope, ptr - envelope);
 }
 
 void qmail_finish(const char* sender)

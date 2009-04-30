@@ -15,6 +15,7 @@ const char* opt_subject_prefix = 0;
 const char* opt_headerkeep = 0;
 const char* opt_headerstrip = 0;
 const char* opt_separator = 0;
+const char* opt_bcc = 0;
 
 static void copy_bool(void* ptr, const char* value, unsigned int length)
 {
@@ -65,6 +66,7 @@ struct option options[] = {
   { "headerstrip", &opt_headerstrip, copy_str },
   { "separator", &opt_separator, copy_str },
   { "subject_prefix", &opt_subject_prefix, copy_str },
+  { "bcc", &opt_bcc, copy_str },
   { 0, 0, 0 }
 };
 

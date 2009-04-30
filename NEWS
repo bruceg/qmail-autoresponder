@@ -4,6 +4,9 @@ Changes in version 0.98
 - Manually invoke qmail-inject and qmail-queue separately in order to
   fully control the envelope and capture the qmail PID.
 
+- Added a "bcc" option to allow for copying autoresponses to an address
+  other than the sender.
+
 - Add an optional separator before the copied message.
 
 - Add a newline after the response message and after the copied header,
