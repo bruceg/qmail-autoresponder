@@ -81,11 +81,21 @@ int qmail_start(void)
   return msgfd;
 }
 
+static void write_envelope(const char* sender)
+{
+  const size_t senderlen = strlen(sender);
+  char envelope[5 + senderlen];
+
+  memcpy(envelope, "F\0T", 3);
+  memcpy(envelope+3, sender, senderlen+1);
+  envelope[3+senderlen+1] = 0;
+
+  write(envfd, envelope, sizeof envelope);
+}
+
 void qmail_finish(const char* sender)
 {
   int status;
-  const size_t senderlen = strlen(sender);
-  char envelope[5 + senderlen];
 
   close(msgfd);
   if(waitpid(inject_pid, &status, WUNTRACED) == -1)
@@ -95,11 +105,7 @@ void qmail_finish(const char* sender)
   if(WEXITSTATUS(status))
     fail_temp("qmail-inject failed");
 
-  memcpy(envelope, "F\0T", 3);
-  memcpy(envelope+3, sender, senderlen+1);
-  envelope[3+senderlen+1] = 0;
-
-  write(envfd, envelope, sizeof envelope);
+  write_envelope(sender);
   close(envfd);
 
   if(waitpid(queue_pid, &status, WUNTRACED) == -1)
