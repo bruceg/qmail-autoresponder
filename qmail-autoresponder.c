@@ -1,11 +1,10 @@
+#include <sysdeps.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <fmt/multi.h>
 #include <str/str.h>
-#include <sysdeps.h>
 #include "qmail-autoresponder.h"
 
 const char usage_args[] = "[MESSAGE-FILE] DIRECTORY";
@@ -110,7 +109,7 @@ int count_history(const char* sender)
   /* create the filename, format "PID.TIME.SENDER" */
   /* The PID is added to avoid collisions. */
   filename = malloc(sender_len+100);
-  sprintf(filename, "%u.%lu.%s", getpid(), now, sender_copy);
+  fmt_multi(filename, "u\\.lu\\.s", getpid(), now, sender_copy);
 
   /* check if there are too many responses in the logs */
   while((entry = readdir(dir)) != NULL) {
