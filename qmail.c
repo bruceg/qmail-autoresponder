@@ -1,8 +1,8 @@
 #include <sysdeps.h>
-#include <stdio.h>
 #include <string.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <msg/msg.h>
 #include "qmail-autoresponder.h"
 
 static pid_t inject_pid;
@@ -128,5 +128,5 @@ void qmail_finish(const char* sender)
     fail_temp("qmail-queue failed");
 
   if (!opt_quiet)
-    fprintf(stderr, "%s: Sent response qp %d\n", argv0, queue_pid);
+    msgf("{Sent response qp }d", queue_pid);
 }

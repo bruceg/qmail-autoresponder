@@ -1,11 +1,11 @@
 #include <sysdeps.h>
 #include <ctype.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
 #include <unistd.h>
 #include <iobuf/iobuf.h>
+#include <msg/msg.h>
 #include <path/path.h>
 #include <str/str.h>
 #include <str/iter.h>
@@ -16,11 +16,11 @@ int opt_nodelete = 0;
 int opt_nosend = 0;
 int opt_quiet = 0;
 
-const char* argv0;
-
 time_t now;
 
 str response = {0,0,0};
+
+const char program[] = "qmail-autoresponder";
 
 static const char* dtline;
 static size_t dtline_len;
@@ -33,7 +33,7 @@ static str tmpstr;
 void fail_msg(const char* msg)
 {
   if(!opt_quiet && msg)
-    fprintf(stderr, "%s: %s\n", argv0, msg);
+    msg1(msg);
 }
 
 void fail_temp(const char* msg)
@@ -54,8 +54,7 @@ static void ignore_ml(const str* s, const char* header)
   unsigned hdrlen = strlen(header);
   if (strncasecmp(s->s, header, hdrlen) == 0 && s->s[hdrlen] == ':') {
     fail_msg("Ignoring message:");
-    fprintf(stderr, "%s: %s (%s header)\n", argv0,
-	    "Message appears to be from a mailing list", header);
+    msgf("{Message appears to be from a mailing list (}s{ header)}", header);
     exit(0);
   }
 }
@@ -321,8 +320,8 @@ static void copy_input(obuf* out)
   }
 }
 
-static const char* usage_str =
-"usage: %s [-cqDNT] [-n NUM] [-s STR] [-t TIME] [-O NAME=VALUE] %s\n"
+static const char usage_str[] =
+"{usage: }s{ [-cqDNT] [-n NUM] [-s STR] [-t TIME] [-O NAME=VALUE] }s{\n"
 " -D       Don't remove old response records\n"
 " -N       Don't send, just send autoresponse to standard output\n"
 " -O N[=V] Set an extended option named N to value V (see below)\n"
@@ -349,13 +348,14 @@ static const char* usage_str =
 "  timelimit      -- Set the time interval, in seconds\n"
 "Items within a list are seperated by \":\", and may contain wildcards.\n"
 "\n"
-"%s";
+"}s";
 
 void usage(const char* msg)
 {
   if(msg)
-    fprintf(stderr, "%s: %s\n", argv0, msg);
-  fprintf(stderr, usage_str, argv0, usage_args, usage_post);
+    msg1(msg);
+  obuf_putf(&errbuf, usage_str, program, usage_args, usage_post);
+  obuf_flush(&errbuf);
   exit(111);
 }
 
@@ -363,8 +363,7 @@ static void parse_args(int argc, char* argv[])
 {
   char* ptr;
   int ch;
-  argv0 = argv[0];
-  while((ch = getopt(argc, argv, "DNO:cn:qs:t:")) != EOF) {
+  while((ch = getopt(argc, argv, "DNO:cn:qs:t:")) != -1) {
     switch(ch) {
     case 'c': opt_copymsg = 1; break;
     case 'n':
