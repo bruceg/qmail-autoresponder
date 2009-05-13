@@ -149,26 +149,13 @@ int count_history(const char* sender)
 
   send_response = count < opt_msglimit;
   
-  str_copy3s(&query,
-	     "INSERT INTO ", prefix, "response "
-	     "(autoresponder,timestamp,sent_response,sender) "
-	     "VALUES (");
-  str_cati(&query, autoresponder);
-  str_cats(&query, ",now(),");
-  str_catu(&query, send_response);
-  str_catc(&query, ',');
-  str_cats_quoted(&query, sender);
-  str_cats(&query, ")");
-  if (mysql_real_query(&mysql, query.s, query.len))
-    fail_temp("Could not insert response record into database.");
-
   return send_response;
 }
 
-void log_sender(const char* sender, int responded)
+static int logit(const char* table, const char* sender, int responded)
 {
-  str_copy3s(&query,
-	     "INSERT INTO ", prefix, "log "
+  str_copy4s(&query,
+	     "INSERT INTO ", prefix, table, " "
 	     "(autoresponder,timestamp,sent_response,sender) "
 	     "VALUES (");
   str_cati(&query, autoresponder);
@@ -177,5 +164,12 @@ void log_sender(const char* sender, int responded)
   str_catc(&query, ',');
   str_cats_quoted(&query, sender);
   str_cats(&query, ")");
-  mysql_real_query(&mysql, query.s, query.len); /* Ignore errors */
+  return mysql_real_query(&mysql, query.s, query.len);
+}
+
+void log_sender(const char* sender, int responded)
+{
+  if (logit("response", sender, responded))
+    fail_temp("Could not insert response record into database.");
+  logit("log", sender, responded); /* Ignore errors for the log table */
 }

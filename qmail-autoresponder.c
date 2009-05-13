@@ -4,6 +4,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <fmt/multi.h>
+#include <msg/wrap.h>
 #include <str/str.h>
 #include "qmail-autoresponder.h"
 
@@ -15,6 +16,8 @@ const char usage_post[] =
 static const char* opt_msgfilename = "message.txt";
 static const char* opt_logfilename = "log.txt";
 static str tmpstr;
+static str safe_sender;
+static const char* last_filename = 0;
 
 static void read_message(const char* filename)
 {
@@ -73,7 +76,7 @@ void init_autoresponder(int argc, char* argv[])
   read_config();
 }
 
-static void create_link(const char* last_filename, char* filename)
+static void create_link(char* filename)
 {
   int fd;
   
@@ -94,17 +97,10 @@ int count_history(const char* sender)
   DIR* dir = opendir(".");
   direntry* entry;
   unsigned count = 0;
-  size_t sender_len;
-  char* sender_copy;
-  size_t i;
-  char* last_filename = 0;
 
   /* Translate all '/' to ':', to avoid fake paths in email addresses */
-  sender_len = strlen(sender);
-  sender_copy = malloc(sender_len+1);
-  for(i = 0; i < sender_len; i++)
-    sender_copy[i] = (sender[i] == '/') ? ':' : sender[i];
-  sender_copy[i] = 0;
+  wrap_str(str_copys(&safe_sender, sender));
+  str_subst(&safe_sender, '/', ':');
 
   /* check if there are too many responses in the logs */
   while((entry = readdir(dir)) != NULL) {
@@ -125,7 +121,7 @@ int count_history(const char* sender)
       if (!opt_nodelete)
 	unlink(entry->d_name);
     } else {
-      if(strcasecmp(end+1, sender_copy)==0)
+      if(strcasecmp(end+1, safe_sender.s)==0)
 	/* If the user's count is already over the max,
 	 * don't record any more. */
 	if(++count >= opt_msglimit)
@@ -134,19 +130,24 @@ int count_history(const char* sender)
     }
   }
 
-  /* create the filename, format "PID.TIME.SENDER" */
-  /* The PID is added to avoid collisions. */
-  str_copyf(&tmpstr, "u\\.lu\\.s", getpid(), now, sender_copy);
-  create_link(last_filename, tmpstr.s);
   return 1;
 }
 
 void log_sender(const char* sender, int responded)
 {
   int fd;
+
+  if (responded) {
+    /* create the filename, format "PID.TIME.SENDER" */
+    /* The PID is added to avoid collisions. */
+    str_copyf(&tmpstr, "u\\.lu\\.s", getpid(), now, safe_sender.s);
+    create_link(tmpstr.s);
+  }
+
   if ((fd = open(opt_logfilename, O_WRONLY | O_APPEND)) != -1) {
     str_copyf(&tmpstr, "u{ }cs{\n}", now, (responded ? '+' : '-'), sender);
     write(fd, tmpstr.s, tmpstr.len);
     close(fd);
   }
+  (void)sender;
 }

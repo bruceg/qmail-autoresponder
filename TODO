@@ -1,4 +1,3 @@
-- Move marking the sender as having sent into log_sender
 - Figure out some way to output multipart/mixed messages?
 - Add support for parsing multipart messages
 
