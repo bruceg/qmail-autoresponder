@@ -223,3 +223,4 @@ egrep -q '^plain text$' stdout
 not egrep -q '^<html>HTML</html>$' stdout
 
 trap - EXIT
+echo All tests passed.
