@@ -1,5 +1,4 @@
 - Move marking the sender as having sent into log_sender
-- Fix documentation of marking senders in the response table
 - Figure out some way to output multipart/mixed messages?
 - Add support for parsing multipart messages
 

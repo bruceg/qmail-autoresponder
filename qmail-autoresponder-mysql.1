@@ -37,11 +37,11 @@ database.  If a record in the
 table matches the username and domain, the program purges old records
 for that autoresponder from the
 .B response
-table and then counts the remaining responses listed there.  If a
-response is sent, a record is also added to that table.
-If a table named
+table and then counts the remaining responses listed there.  A record is
+then added to that table indicating if a response was sent or not.  If a
+table named
 .B log
-exists, a record is added to it each time a sender is processed.  The
+exists, the same record is added to it as well.  The
 .B log
 table is never automatically pruned.
 .P
