@@ -16,6 +16,9 @@ qmail-autoresponder-mysql \- Produce automatic responses with qmail
 .B -t TIME
 ]
 .I USERNAME DOMAIN
+[
+.I TABLE_PREFIX
+]
 .SH DESCRIPTION
 .B qmail-autoresponder-mysql
 sends an automatically-generated message in response to an incoming
@@ -37,9 +40,23 @@ for that autoresponder from the
 table and then counts the remaining responses listed there.  If a
 response is sent, a record is also added to that table.
 .P
+If a
+.I TABLE_PREFIX
+argument is given, all table names are prefixed with that string.  For
+example, if
+.I TABLE_PREFIX
+is
+.B q_
+then the tables used are
+.B q_autoresponder
+and
+.BR q_response .
+This can be used to allow these tables to co-exist with tables for other
+programs in the same database.
+.P
 See the man page for
 .BR qmail-autoresponder (1)
-for more details.
+for more details on options and general autoresponder behavior.
 .SH OPTIONS
 .B qmail-autoresponder-mysql
 supports options specified on the command line and as fields in the

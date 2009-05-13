@@ -3,10 +3,12 @@ export MYSQL_DB=qmail-autoresponder
 
 . runtests-common.sh
 
-mysql $MYSQL_DB < ../schema.mysql
+prefix=test_
+sed -e "s/@PREFIX@/$prefix/g" ../schema.mysql.in \
+| mysql $MYSQL_DB
 
 mysql $MYSQL_DB <<EOF
-INSERT INTO autoresponder (username,domain,opt_timelimit,opt_msglimit,response)
+INSERT INTO ${prefix}autoresponder (username,domain,opt_timelimit,opt_msglimit,response)
 VALUES (
   NULL, 'my.domain', 1, 1,
   'From: nobody in particular\ntest\ntest %S test\n'
@@ -14,7 +16,7 @@ VALUES (
 EOF
 
 update() {
-  mysql -e "update autoresponder SET $*" $MYSQL_DB
+  mysql -e "update ${prefix}autoresponder SET $*" $MYSQL_DB
 }
 
 ar() {
@@ -27,7 +29,7 @@ ar() {
   echo "Test SENDER=$SENDER; $update"
 
   make_message >tempfile
-  runqa $succeeds -mysql -- me my.domain
+  runqa $succeeds -mysql -- me my.domain $prefix
 }
 
 # Should send response normally

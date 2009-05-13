@@ -4,7 +4,7 @@
 #include <str/str.h>
 #include "qmail-autoresponder.h"
 
-const char usage_args[] = "USERNAME DOMAIN";
+const char usage_args[] = "USERNAME DOMAIN [TABLE_PREFIX]";
 const char usage_post[] =
 "  All the options except for -q, -D, and -N can be overridden\n"
 "  in the autoresponder SQL table.\n";
@@ -12,6 +12,7 @@ const char usage_post[] =
 static long autoresponder;
 static MYSQL mysql;
 static str query;
+static const char* prefix;
 
 static int str_cats_quoted(str* s, const char* p)
 {
@@ -31,10 +32,10 @@ static int str_cats_quoted(str* s, const char* p)
 static MYSQL_RES* do_select(const char* username, const char* domain)
 {
   MYSQL_RES* result;
-  str_copys(&query,
-	    "SELECT * "
-	    "FROM autoresponder "
-	    "WHERE username");
+  str_copy3s(&query,
+	     "SELECT * "
+	     "FROM ", prefix, "autoresponder "
+	     "WHERE username");
   if (username) {
     str_catc(&query, '=');
     str_cats_quoted(&query, username);
@@ -73,9 +74,11 @@ void init_autoresponder(int argc, char** argv)
   unsigned int i;
   MYSQL_FIELD* fields;
   
-  if (argc != 2) usage("Incorrect number of command-line arguments.");
+  if (argc < 2 || argc > 3)
+    usage("Incorrect number of command-line arguments.");
   username = argv[0];
   domain = argv[1];
+  prefix = (argc > 2) ? argv[2] : "";
 
   mysql_init(&mysql);
   mysql_options(&mysql, MYSQL_READ_DEFAULT_GROUP, "qmail-autoresponder");
@@ -114,8 +117,8 @@ int count_history(const char* sender)
   MYSQL_ROW row;
   
   if (!opt_nodelete) {
-    str_copys(&query, "DELETE FROM response "
-	      "WHERE autoresponder=");
+    str_copy3s(&query, "DELETE FROM ", prefix, "response "
+	       "WHERE autoresponder=");
     str_cati(&query, autoresponder);
     str_cats(&query, " AND timestamp < (now() - INTERVAL ");
     str_catu(&query, opt_timelimit);
@@ -124,10 +127,10 @@ int count_history(const char* sender)
       fail_temp("Could not delete old records from database.");
   }
   
-  str_copys(&query, "SELECT count(*) "
-	    "FROM response "
-	    "WHERE sent_response <> 0 "
-	    "AND autoresponder=");
+  str_copy3s(&query, "SELECT count(*) "
+	     "FROM ", prefix, "response "
+	     "WHERE sent_response <> 0 "
+	     "AND autoresponder=");
   str_cati(&query, autoresponder);
   str_cats(&query, " AND sender=");
   str_cats_quoted(&query, sender);
@@ -146,10 +149,10 @@ int count_history(const char* sender)
 
   send_response = count < opt_msglimit;
   
-  str_copys(&query,
-	    "INSERT INTO response "
-	    "(autoresponder,timestamp,sent_response,sender) "
-	    "VALUES (");
+  str_copy3s(&query,
+	     "INSERT INTO ", prefix, "response "
+	     "(autoresponder,timestamp,sent_response,sender) "
+	     "VALUES (");
   str_cati(&query, autoresponder);
   str_cats(&query, ",now(),");
   str_catu(&query, send_response);

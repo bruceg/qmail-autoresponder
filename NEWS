@@ -12,6 +12,9 @@ Changes in version 0.98
 - Add a newline after the response message and after the copied header,
   to make sure there is at least one blank line between them.
 
+- The MySQL autoresponder now supports an optional table name prefix to
+  better interoperate with other applications using the same database.
+
 Development of this version has been sponsored by FutureQuest, Inc.
 ossi@FutureQuest.net  http://www.FutureQuest.net/
 -------------------------------------------------------------------------------
