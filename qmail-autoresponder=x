@@ -1,4 +1,6 @@
+headers.o
 main.o
-qmail.o
 options.o
+qmail.o
+response.o
 -lbg

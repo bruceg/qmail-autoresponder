@@ -1,6 +1,7 @@
 #ifndef QMAIL_AUTORESPONDER__H__
 #define QMAIL_AUTORESPONDER__H__
 
+struct obuf;
 struct str;
 
 extern int opt_quiet;
@@ -31,14 +32,24 @@ extern void handle_option(const char* name,
 			  unsigned int length);
 
 extern time_t now;
+extern struct str boundary;
+extern struct str copyheaders;
+extern struct str message_id;
 extern struct str response;
+extern struct str subject;
+extern struct str tmpstr;
 
 void fail_msg(const char* msg);
 void fail_temp(const char* msg);
 void usage(const char*);
+void ignore(const char* msg);
 
 int qmail_start(void);
 void qmail_finish(const char* sender);
+
+void read_parse_headers(void);
+
+void build_response(struct obuf* out);
 
 /* Defined by the individual modules */
 extern const char usage_args[];

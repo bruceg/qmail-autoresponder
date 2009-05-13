@@ -15,7 +15,6 @@ const char usage_post[] =
 
 static const char* opt_msgfilename = "message.txt";
 static const char* opt_logfilename = "log.txt";
-static str tmpstr;
 static str safe_sender;
 static const char* last_filename = 0;
 
