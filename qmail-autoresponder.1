@@ -64,6 +64,22 @@ Any files that are older than the time interval (see below) are
 deleted and ignored.  If the number of remaining files with the same
 sender address is greater than or equal to the maximum number of
 replies, no response is generated.
+.P
+If
+.I DIRECTORY
+contains a writeable file named
+.IR log.txt ,
+then a line is added to this file each time a sender is processed.  The
+format of these lines are as follows:
+.RS
+.EX
+TIMESTAMP +SENDER
+TIMESTAMP -SENDER
+.EE
+.RE
+The first line indicates a message was sent to the sender, and the
+second that a message was not sent.  The timestamp is expressed as
+standard UNIX time (the number of seconds since Jan 1 1970 GMT).
 .SH OPTIONS
 .B qmail-autoresponder
 supports options specified on the command line and as files in the

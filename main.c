@@ -424,8 +424,10 @@ int main(int argc, char* argv[])
   parse_headers();
 
   // Check rate that SENDER has sent
-  if(!count_history(sender))
+  if(!count_history(sender)) {
+    log_sender(sender, 0);
     ignore("SENDER has sent too many messages");
+  }
 
   if(opt_nosend)
     out = &outbuf;
@@ -452,6 +454,7 @@ int main(int argc, char* argv[])
   
   if (!opt_nosend)
     qmail_finish(sender);
+  log_sender(sender, 1);
   
   return 0;
 }

@@ -10,6 +10,8 @@ test
 test %S test
 EOF
 
+touch log.txt
+
 # This big message splits the "%S" across a buffer boundary
 cat >big-message.txt <<EOF
 From: nobody in particular
@@ -221,6 +223,13 @@ echo 1 > numlines
 ar true numlines-file@my.domain ''
 egrep -q '^plain text$' stdout
 not egrep -q '^<html>HTML</html>$' stdout
+
+if [ $( wc -l <log.txt ) != 25 ]; then
+  echo Wrong number of lines in the log file.
+  exit 1
+else
+  echo Log file has the right number of entries.
+fi
 
 trap - EXIT
 echo All tests passed.

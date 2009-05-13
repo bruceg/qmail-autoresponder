@@ -13,6 +13,8 @@ const char usage_post[] =
 "  MESSAGE-FILE defaults to 'message.txt'.\n";
 
 static const char* opt_msgfilename = "message.txt";
+static const char* opt_logfilename = "log.txt";
+static str tmpstr;
 
 static void read_message(const char* filename)
 {
@@ -82,7 +84,6 @@ static void create_link(const char* last_filename, char* filename)
 
   /* Otherwise, create a new 0-byte file now */
   fd = open(filename, O_WRONLY|O_CREAT|O_EXCL, 0444);
-  free(filename);
   if(fd == -1)
     fail_temp("Unable to create temporary file for sender.");
   close(fd);
@@ -93,7 +94,6 @@ int count_history(const char* sender)
   DIR* dir = opendir(".");
   direntry* entry;
   unsigned count = 0;
-  char* filename;
   size_t sender_len;
   char* sender_copy;
   size_t i;
@@ -105,11 +105,6 @@ int count_history(const char* sender)
   for(i = 0; i < sender_len; i++)
     sender_copy[i] = (sender[i] == '/') ? ':' : sender[i];
   sender_copy[i] = 0;
-
-  /* create the filename, format "PID.TIME.SENDER" */
-  /* The PID is added to avoid collisions. */
-  filename = malloc(sender_len+100);
-  fmt_multi(filename, "u\\.lu\\.s", getpid(), now, sender_copy);
 
   /* check if there are too many responses in the logs */
   while((entry = readdir(dir)) != NULL) {
@@ -139,6 +134,19 @@ int count_history(const char* sender)
     }
   }
 
-  create_link(last_filename, filename);
+  /* create the filename, format "PID.TIME.SENDER" */
+  /* The PID is added to avoid collisions. */
+  str_copyf(&tmpstr, "u\\.lu\\.s", getpid(), now, sender_copy);
+  create_link(last_filename, tmpstr.s);
   return 1;
+}
+
+void log_sender(const char* sender, int responded)
+{
+  int fd;
+  if ((fd = open(opt_logfilename, O_WRONLY | O_APPEND)) != -1) {
+    str_copyf(&tmpstr, "u{ }cs{\n}", now, (responded ? '+' : '-'), sender);
+    write(fd, tmpstr.s, tmpstr.len);
+    close(fd);
+  }
 }

@@ -39,6 +39,11 @@ for that autoresponder from the
 .B response
 table and then counts the remaining responses listed there.  If a
 response is sent, a record is also added to that table.
+If a table named
+.B log
+exists, a record is added to it each time a sender is processed.  The
+.B log
+table is never automatically pruned.
 .P
 If a
 .I TABLE_PREFIX

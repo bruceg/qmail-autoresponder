@@ -45,5 +45,6 @@ extern const char usage_args[];
 extern const char usage_post[];
 void init_autoresponder(int argc, char** argv);
 int count_history(const char* sender);
+void log_sender(const char* sender, int responded);
 
 #endif

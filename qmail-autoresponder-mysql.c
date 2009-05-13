@@ -164,3 +164,18 @@ int count_history(const char* sender)
 
   return send_response;
 }
+
+void log_sender(const char* sender, int responded)
+{
+  str_copy3s(&query,
+	     "INSERT INTO ", prefix, "log "
+	     "(autoresponder,timestamp,sent_response,sender) "
+	     "VALUES (");
+  str_cati(&query, autoresponder);
+  str_cats(&query, ",now(),");
+  str_catu(&query, responded);
+  str_catc(&query, ',');
+  str_cats_quoted(&query, sender);
+  str_cats(&query, ")");
+  mysql_real_query(&mysql, query.s, query.len); /* Ignore errors */
+}

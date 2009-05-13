@@ -16,7 +16,7 @@ VALUES (
 EOF
 
 update() {
-  mysql -e "update ${prefix}autoresponder SET $*" $MYSQL_DB
+  mysql -e "UPDATE ${prefix}autoresponder SET $*" $MYSQL_DB
 }
 
 ar() {
@@ -72,6 +72,14 @@ egrep -q '^X-Header: test' stdout
 ar true numlines@my.domain "opt_numlines=1"
 egrep -q '^plain text$' stdout
 not egrep -q '^<html>HTML</html>$' stdout
+
+if [ $( mysql --table -e "SELECT * FROM ${prefix}log" $MYSQL_DB \
+        | wc -l ) != 15 ]; then
+  echo Wrong number of records in the log table.
+  exit 1
+else
+  echo Log table has the right number of records.
+fi
 
 trap - EXIT
 echo All tests passed.

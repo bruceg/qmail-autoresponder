@@ -1,8 +1,8 @@
+- Move marking the sender as having sent into log_sender
+- Fix documentation of marking senders in the response table
 - Figure out some way to output multipart/mixed messages?
 - Add support for parsing multipart messages
 
 - Split the response generation portion into a seperate program.
-- Add option to limit size of copied message
-- Add option to write out a log file
 - Add support for an optional "schedule" file
 - Add option to response generation to MIME-encode the copied message.
