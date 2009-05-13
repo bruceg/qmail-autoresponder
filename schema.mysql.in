@@ -2,8 +2,8 @@ DROP TABLE IF EXISTS @PREFIX@response, @PREFIX@autoresponder, @PREFIX@log;
 
 CREATE TABLE @PREFIX@autoresponder (
   id INT AUTO_INCREMENT NOT NULL PRIMARY KEY,
-  username VARCHAR(128),
-  domain VARCHAR(128) NOT NULL,
+  username TINYTEXT,
+  domain TINYTEXT NOT NULL,
   response TEXT NOT NULL,
   opt_timelimit INT,
   opt_msglimit INT,
@@ -13,22 +13,22 @@ CREATE TABLE @PREFIX@autoresponder (
   opt_numlines INT,
   opt_headerkeep TINYTEXT,
   opt_headerstrip TINYTEXT,
-  opt_separator TINYTEXT
+  opt_separator TINYTEXT,
+  UNIQUE KEY (username(128),domain(128))
 );
-CREATE UNIQUE INDEX @PREFIX@autoresponder_skey ON @PREFIX@autoresponder(username,domain);
 
 CREATE TABLE @PREFIX@response (
   autoresponder INT NOT NULL REFERENCES @PREFIX@autoresponder(id),
   timestamp TIMESTAMP NOT NULL,
   sent_response BOOL NOT NULL,
-  sender VARCHAR(255) NOT NULL
+  sender TINYTEXT NOT NULL,
+  KEY (autoresponder),
+  KEY (sender(255))
 );
-CREATE INDEX @PREFIX@response_pkey ON @PREFIX@response(autoresponder);
-CREATE INDEX @PREFIX@response_skey ON @PREFIX@response(sender);
 
 CREATE TABLE @PREFIX@log (
   autoresponder INT NOT NULL REFERENCES @PREFIX@autoresponder(id),
   timestamp TIMESTAMP NOT NULL,
   sent_response BOOL NOT NULL,
-  sender VARCHAR(255) NOT NULL
+  sender TINYTEXT NOT NULL
 );
