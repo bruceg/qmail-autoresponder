@@ -1,0 +1,2 @@
+: schema.mysql.in
+sed -e 's/@PREFIX@//g' <%(deplist)s >%(target)s

@@ -1,6 +1,6 @@
-DROP TABLE IF EXISTS response, autoresponder;
+DROP TABLE IF EXISTS @PREFIX@response, @PREFIX@autoresponder;
 
-CREATE TABLE autoresponder (
+CREATE TABLE @PREFIX@autoresponder (
   id INT AUTO_INCREMENT NOT NULL PRIMARY KEY,
   username VARCHAR(128),
   domain VARCHAR(128) NOT NULL,
@@ -15,13 +15,13 @@ CREATE TABLE autoresponder (
   opt_headerstrip TINYTEXT,
   opt_separator TINYTEXT
 );
-CREATE UNIQUE INDEX autoresponder_skey ON autoresponder(username,domain);
+CREATE UNIQUE INDEX @PREFIX@autoresponder_skey ON @PREFIX@autoresponder(username,domain);
 
-CREATE TABLE response (
-  autoresponder INT NOT NULL REFERENCES autoresponder(id),
+CREATE TABLE @PREFIX@response (
+  autoresponder INT NOT NULL REFERENCES @PREFIX@autoresponder(id),
   timestamp TIMESTAMP NOT NULL,
   sent_response BOOL NOT NULL,
   sender VARCHAR(255) NOT NULL
 );
-CREATE INDEX response_pkey ON response(autoresponder);
-CREATE INDEX response_skey ON response(sender);
+CREATE INDEX @PREFIX@response_pkey ON @PREFIX@response(autoresponder);
+CREATE INDEX @PREFIX@response_skey ON @PREFIX@response(sender);
