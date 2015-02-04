@@ -1,7 +1,7 @@
-#!/bin/bash
+#!/bin/sh
 export MYSQL_DB=qmail-autoresponder
 
-. runtests-common.sh
+. ./runtests-common.sh
 
 prefix=test_
 sed -e "s/@PREFIX@/$prefix/g" ../schema.mysql.in \

@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/bin/sh
 
-. runtests-common.sh
+. ./runtests-common.sh
 export MSGFILE="message.txt"
 
 cat >message.txt <<EOF
