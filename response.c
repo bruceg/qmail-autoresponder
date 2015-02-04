@@ -1,15 +1,15 @@
-#include <sysdeps.h>
+#include <bglibs/sysdeps.h>
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <iobuf/iobuf.h>
-#include <msg/msg.h>
-#include <path/path.h>
-#include <str/str.h>
-#include <str/iter.h>
-#include <systime.h>
+#include <bglibs/iobuf.h>
+#include <bglibs/msg.h>
+#include <bglibs/path.h>
+#include <bglibs/str.h>
+#include <bglibs/striter.h>
+#include <bglibs/systime.h>
 #include "qmail-autoresponder.h"
 
 static void write_response(obuf* out)

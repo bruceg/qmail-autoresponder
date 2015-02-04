@@ -1,8 +1,8 @@
-#include <sysdeps.h>
+#include <bglibs/sysdeps.h>
 #include <string.h>
 #include <sys/wait.h>
 #include <unistd.h>
-#include <msg/msg.h>
+#include <bglibs/msg.h>
 #include "qmail-autoresponder.h"
 
 static pid_t inject_pid;

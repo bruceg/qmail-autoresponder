@@ -1,7 +1,7 @@
 #include <mysql/mysql.h>
 #include <stdlib.h>
 #include <string.h>
-#include <str/str.h>
+#include <bglibs/str.h>
 #include "qmail-autoresponder.h"
 
 const char usage_args[] = "USERNAME DOMAIN [TABLE_PREFIX]";

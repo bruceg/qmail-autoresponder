@@ -1,11 +1,11 @@
-#include <sysdeps.h>
+#include <bglibs/sysdeps.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <string.h>
 #include <unistd.h>
-#include <fmt/multi.h>
-#include <msg/wrap.h>
-#include <str/str.h>
+#include <bglibs/fmt.h>
+#include <bglibs/wrap.h>
+#include <bglibs/str.h>
 #include "qmail-autoresponder.h"
 
 const char usage_args[] = "[MESSAGE-FILE] DIRECTORY";
