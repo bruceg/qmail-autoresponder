@@ -102,7 +102,8 @@ static void write_envelope(const char* sender)
   }
   *ptr++ = 0;
 
-  write(envfd, envelope, ptr - envelope);
+  if (write(envfd, envelope, ptr - envelope) != ptr - envelope)
+    fail_temp("Failed to write envelope data to qmail-queue");
 }
 
 void qmail_finish(const char* sender)
