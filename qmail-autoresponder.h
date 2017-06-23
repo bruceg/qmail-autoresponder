@@ -23,7 +23,7 @@ struct option
 {
   const char* name;
   void* ptr;
-  void (*copyfn)(void* dest, const char* value, unsigned int length);
+  const char* (*copyfn)(void* dest, const char* value, unsigned int length);
 };
 
 extern struct option options[];

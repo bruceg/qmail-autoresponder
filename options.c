@@ -1,6 +1,7 @@
 #include <mysql/mysql.h>
 #include <stdlib.h>
 #include <string.h>
+#include <bglibs/msg.h>
 #include <bglibs/str.h>
 #include "qmail-autoresponder.h"
 
@@ -17,7 +18,7 @@ const char* opt_headerstrip = 0;
 const char* opt_separator = 0;
 const char* opt_bcc = 0;
 
-static void copy_bool(void* ptr, const char* value, unsigned int length)
+static const char* copy_bool(void* ptr, const char* value, unsigned int length)
 {
   int* dest = ptr;
   switch (value[0]) {
@@ -27,31 +28,36 @@ static void copy_bool(void* ptr, const char* value, unsigned int length)
   case 'y':
   case 'Y':
     *dest = 1;
-    break;
+    return NULL;
   case '0':
   case 'F':
   case 'f':
   case 'N':
   case 'n':
     *dest = 0;
-    break;
+    return NULL;
+  default:
+    return "Invalid boolean";
   }
   (void)length;
 }
 
-static void copy_ulong(void* ptr, const char* value, unsigned int length)
+static const char* copy_ulong(void* ptr, const char* value, unsigned int length)
 {
   unsigned long* dest = ptr;
-  *dest = strtoul(value, 0, 10);
+  char* end;
+  *dest = strtoul(value, &end, 10);
+  return (end < value + length) ? "Invalid number" : NULL;
   (void)length;
 }
 
-static void copy_str(void* ptr, const char* value, unsigned int length)
+static const char* copy_str(void* ptr, const char* value, unsigned int length)
 {
   char** dest = ptr;
   *dest = malloc(length + 1);
   memcpy(*dest, value, length);
   (*dest)[length] = 0;
+  return NULL;
 }
 
 struct option options[] = {
@@ -75,9 +81,14 @@ void handle_option(const char* name,
 		   unsigned int length)
 {
   struct option* option;
+  const char* err;
   for (option = options; option->name != 0; ++option) {
     if (strcmp(name, option->name) == 0) {
-      option->copyfn(option->ptr, value, length);
+      if ((err = option->copyfn(option->ptr, value, length)) != NULL) {
+        if (!opt_quiet)
+          errorf("{Configuration error in }s{: }s{: \"}s{\"}", name, err, value);
+        exit(111);
+      }
       break;
     }
   }
