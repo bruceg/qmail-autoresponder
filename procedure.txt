@@ -1,5 +1,6 @@
 Top-level procedure:
 --------------------
+- Don't respond if NOW < STARTTIME or NOW > ENDTIME
 - Lookup SENDER
 - Don't respond if:
   - SENDER is not set

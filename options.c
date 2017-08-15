@@ -1,6 +1,8 @@
+#define _XOPEN_SOURCE
 #include <mysql/mysql.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <bglibs/msg.h>
 #include <bglibs/str.h>
 #include "qmail-autoresponder.h"
@@ -17,6 +19,9 @@ const char* opt_headerkeep = 0;
 const char* opt_headerstrip = 0;
 const char* opt_separator = 0;
 const char* opt_bcc = 0;
+
+time_t opt_starttime = 0;
+time_t opt_endtime = 0;
 
 static const char* copy_bool(void* ptr, const char* value, unsigned int length)
 {
@@ -60,6 +65,32 @@ static const char* copy_str(void* ptr, const char* value, unsigned int length)
   return NULL;
 }
 
+static const char* time_formats[] = {
+  "%Y-%m-%d",
+  "%Y-%m-%d %H:%M:%S",
+  "%c",
+};
+
+static const char* copy_time(void* ptr, const char* value, unsigned int length)
+{
+  time_t* dest = ptr;
+  unsigned long t;
+  char* end;
+  unsigned int i;
+  if ((t = strtoul(value, &end, 10)) > 0 && *end == 0) {
+    *dest = t;
+    return NULL;
+  }
+  for (i = 0; i < sizeof time_formats / sizeof *time_formats; i++) {
+    struct tm tm;
+    if (strptime(value, time_formats[i], &tm) == value + length) {
+      if ((*dest = mktime(&tm)) != (time_t)-1)
+        return NULL;
+    }
+  }
+  return "Invalid time value";
+}
+
 struct option options[] = {
   { "copymsg", &opt_copymsg, copy_bool },
   { "no_inreplyto", &opt_no_inreplyto, copy_bool },
@@ -73,6 +104,10 @@ struct option options[] = {
   { "separator", &opt_separator, copy_str },
   { "subject_prefix", &opt_subject_prefix, copy_str },
   { "bcc", &opt_bcc, copy_str },
+
+  { "starttime", &opt_starttime, copy_time },
+  { "endtime", &opt_endtime, copy_time },
+
   { 0, 0, 0 }
 };
 

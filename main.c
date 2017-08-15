@@ -81,6 +81,8 @@ static const char usage_str[] =
 "  separator      -- Add a separator between the response and copied message\n"
 "  subject_prefix -- Add the original subject to the autoresponse with a prefix\n"
 "  timelimit      -- Set the time interval, in seconds\n"
+"  starttime      -- Set the time before which no response is sent\n"
+"  endtime        -- Set the time after which no response is sent\n"
 "Items within a list are seperated by \":\", and may contain wildcards.\n"
 "\n"
 "}s";
@@ -138,6 +140,11 @@ int main(int argc, char* argv[])
   const char* sender;
   
   parse_args(argc, argv);
+
+  if (opt_starttime && now < opt_starttime)
+    ignore("Autoresponder is not active yet");
+  if (opt_endtime && now > opt_endtime)
+    ignore("Autoresponder is no longer active");
 
   sender = getenv("SENDER");
   if(!sender)

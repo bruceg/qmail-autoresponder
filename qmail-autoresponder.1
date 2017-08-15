@@ -138,6 +138,10 @@ original sender.
 .B copymsg \fR(boolean)
 Copy the original message into the response.
 .TP
+.B endtime \fR(string)
+Set the ending time for which this autoresponder is active.
+Messages received after this time will not cause a response to be generated.
+.TP
 .B headerkeep \fR(string)
 If this option is given, only the headers listed in the value are copied
 from the message into the response.  Separate header names with a colon.
@@ -185,6 +189,10 @@ the header are copied.
 .B separator \fR(string)
 Add a separator line (or lines) between the response message and the
 copied message.
+.TP
+.B starttime \fR(string)
+Set the starting time for which this autoresponder is active.
+Messages received before this time will not cause a response to be generated.
 .TP
 .B subject_prefix \fR(string)
 Add a subject line to the response message composed of the prefix

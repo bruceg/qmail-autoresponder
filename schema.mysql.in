@@ -14,6 +14,8 @@ CREATE TABLE @PREFIX@autoresponder (
   opt_headerkeep TINYTEXT,
   opt_headerstrip TINYTEXT,
   opt_separator TINYTEXT,
+  opt_starttime TIMESTAMP,
+  opt_endtime TIMESTAMP,
   UNIQUE KEY (username(128),domain(128))
 );
 

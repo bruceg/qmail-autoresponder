@@ -20,6 +20,7 @@ Features:
 - Can copy original message into response.
 - Can use links in the rate-limiting data directory to limit inode usage
   to a single inode.
+- Can limit responses to a certain date/time range.
 
 A mailing list has been set up to discuss this and other packages.
 To subscribe, send an email to:

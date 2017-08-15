@@ -18,6 +18,8 @@ extern const char* opt_headerkeep;
 extern const char* opt_headerstrip;
 extern const char* opt_separator;
 extern const char* opt_bcc;
+extern time_t opt_starttime;
+extern time_t opt_endtime;
 
 struct option
 {

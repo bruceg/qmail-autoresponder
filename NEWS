@@ -1,4 +1,6 @@
 
+- Added options to control the start and end time for autoresponders.
+
 - Added errors for invalid configuration options.
 -------------------------------------------------------------------------------
 Changes in version 0.98
