@@ -1,3 +1,5 @@
+
+- Fixed handling of MySQL default timestamp value.
 -------------------------------------------------------------------------------
 Changes in version 1.0
 

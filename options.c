@@ -81,6 +81,11 @@ static const char* copy_time(void* ptr, const char* value, unsigned int length)
     *dest = t;
     return NULL;
   }
+  /* MySQL default non-NULL time value is all zeros */
+  if (strcmp(value, "0000-00-00 00:00:00") == 0) {
+    *dest = 0;
+    return NULL;
+  }
   for (i = 0; i < sizeof time_formats / sizeof *time_formats; i++) {
     struct tm tm;
     if (strptime(value, time_formats[i], &tm) == value + length) {
