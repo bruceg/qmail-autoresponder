@@ -145,7 +145,7 @@ void log_sender(const char* sender, int responded)
 
   if ((fd = open(opt_logfilename, O_WRONLY | O_APPEND)) != -1) {
     str_copyf(&tmpstr, "u{ }cs{\n}", now, (responded ? '+' : '-'), sender);
-    write(fd, tmpstr.s, tmpstr.len);
+    if (write(fd, tmpstr.s, tmpstr.len) != tmpstr.len) { /* ignore */ }
     close(fd);
   }
   (void)sender;
