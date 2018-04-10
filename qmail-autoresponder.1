@@ -21,7 +21,11 @@ qmail-autoresponder \- Produce automatic responses with qmail
 .SH DESCRIPTION
 .B qmail-autoresponder
 sends an automatically-generated message in response to an incoming
-message.  By default, it limits the number of responses it sends to a
+message.
+It also tracks the number of responses it sends to each sender in
+order to limit the rate at which it sends responses, to prevent mail
+flooding or denial of service attacks.
+By default, it limits the number of responses it sends to a
 maximum of one message per hour per sender.  It will not respond to
 any known mailing list, nor will it respond to either bounces or
 loops.
@@ -43,11 +47,10 @@ All occurrences of
 in the message file are replaced with the original message's subject.
 To put a percent sign in the message, write it as
 .IR %% .
-.P
+.SS RESPONSE COUNTING
+For each response
 .B qmail-autoresponder
-limits the rate at which it sends responses to each recipient to
-prevent mail flooding or denial-of-service attacks.
-For each response it sends, it creates a file in
+sends, it creates a file in
 .IR DIRECTORY .
 The name of that file consists of the process ID of
 .BR qmail-autoresponder ,
@@ -64,7 +67,7 @@ Any files that are older than the time interval (see below) are
 deleted and ignored.  If the number of remaining files with the same
 sender address is greater than or equal to the maximum number of
 replies, no response is generated.
-.P
+.SS LOGGING
 If
 .I DIRECTORY
 contains a writeable file named
