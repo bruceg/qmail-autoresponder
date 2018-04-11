@@ -76,7 +76,7 @@ static int read_config_file(void)
   while (ibuf_getstr(&in, &line, '\n')) {
     str_rstrip(&line);
     if (line.len == 0)
-      continue;
+      break;
     if (line.s[0] == '#')
       continue;
     /* Match lines like "key=value" */
@@ -95,6 +95,10 @@ static int read_config_file(void)
     }
   }
   str_free(&line);
+
+  if (!ibuf_readall(&in, &response))
+    fail_temp("Error while reading message from config file.");
+
   ibuf_close(&in);
   return 1;
 }
@@ -110,9 +114,10 @@ void init_autoresponder(int argc, char* argv[])
   }
   if(chdir(argv[i]) == -1)
     usage("Could not change directory to DIRECTORY.");
-  read_message(opt_msgfilename);
   if (!read_config_file())
     read_config_files();
+  if (response.len == 0)
+    read_message(opt_msgfilename);
 }
 
 static void create_link(char* filename)

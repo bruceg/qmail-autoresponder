@@ -108,6 +108,11 @@ Lines starting with
 .I #
 are ignored.
 .P
+The message may also be placed in this configuration file. It is
+separated from the settings by a single blank line. If present,
+.B message.txt
+is not read for the response message.
+.P
 For example:
 .RS
 .EX
@@ -117,6 +122,11 @@ headerkeep = subject:x-*
 bcc = sendmeacopy@example.com
 starttime = 2018-03-14 15:59:00
 subject=This is a very long response subject that does not include the original
+
+From: Automatic Responder <recipient@example.com>
+Subject: Vacation response (%S)
+
+This is an automated response to your email...
 .EE
 .RE
 .SS "COMMAND LINE"

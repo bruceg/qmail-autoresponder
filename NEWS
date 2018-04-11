@@ -1,5 +1,5 @@
 
-- Added support for single file config mode.
+- Added support for single file config mode, including the response.
 
 - Fixed handling of MySQL default timestamp value.
 -------------------------------------------------------------------------------
