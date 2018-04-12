@@ -1,4 +1,7 @@
 
+- Changed the filenames of response record files so they sort by time in
+  a directory listing. This may cause extra responses after upgrading.
+
 - Added support for single file config mode, including the response.
 
 - Fixed handling of MySQL default timestamp value.

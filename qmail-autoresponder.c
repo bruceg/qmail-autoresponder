@@ -148,23 +148,22 @@ int count_history(const char* sender)
 
   /* check if there are too many responses in the logs */
   while((entry = readdir(dir)) != NULL) {
-    char* ptr;
     char* end;
     time_t message_time;
     unsigned message_pid;
     if(entry->d_name[0] == '.')
       continue;
-    message_pid = strtoul(entry->d_name, &ptr, 10);
-    if(message_pid == 0 || *ptr != '.')
-      continue;
-    message_time = strtoul(ptr+1, &end, 10);
-    if(!end || *end != '.')
+    message_time = strtoul(entry->d_name, &end, 10);
+    if(message_time == 0 || end == NULL || *end != '.')
       continue;
     if((unsigned long)(now - message_time) > opt_timelimit) {
       /* too old..ignore errors on unlink */
       if (!opt_nodelete)
 	unlink(entry->d_name);
     } else {
+      message_pid = strtoul(end+1, &end, 10);
+      if(message_pid == 0 || end == NULL || *end != '.')
+        continue;
       if(strcasecmp(end+1, safe_sender.s)==0)
 	/* If the user's count is already over the max,
 	 * don't record any more. */
@@ -182,9 +181,9 @@ void log_sender(const char* sender, int responded)
   int fd;
 
   if (responded) {
-    /* create the filename, format "PID.TIME.SENDER" */
+    /* create the filename, format "TIME.PID.SENDER" */
     /* The PID is added to avoid collisions. */
-    str_copyf(&tmpstr, "u\\.lu\\.s", getpid(), now, safe_sender.s);
+    str_copyf(&tmpstr, "lu\\.u\\.s", now, getpid(), safe_sender.s);
     create_link(tmpstr.s);
   }
 

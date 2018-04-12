@@ -52,10 +52,10 @@ For each response
 .B qmail-autoresponder
 sends, it creates a file in
 .IR DIRECTORY .
-The name of that file consists of the process ID of
+The name of that file consists of the current UNIX time number, a period,
+the process ID of
 .BR qmail-autoresponder ,
-a period, the current UNIX time number, and the envelope sender
-address (with any
+a period, and the envelope sender address (with any
 .I /
 characters replaced with
 .I :
