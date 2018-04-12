@@ -44,7 +44,11 @@ argument is not present, it defaults to
 .IR message.txt .
 All occurrences of
 .I %S
-in the message file are replaced with the original message's subject.
+in the message file are replaced with the original message's subject,
+.I %s
+with the original message's sender (to which the response will be sent), and
+.I %r
+with the original message's recipient.
 To put a percent sign in the message, write it as
 .IR %% .
 .SS RESPONSE COUNTING

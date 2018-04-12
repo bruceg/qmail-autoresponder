@@ -51,7 +51,7 @@ void qmail_finish(const char* sender);
 
 void read_parse_headers(void);
 
-void build_response(struct obuf* out);
+void build_response(struct obuf* out, const char* sender, const char* recipient);
 
 /* Defined by the individual modules */
 extern const char usage_args[];

@@ -12,7 +12,7 @@
 #include <bglibs/systime.h>
 #include "qmail-autoresponder.h"
 
-static void write_response(obuf* out)
+static void write_response(obuf* out, const char* sender, const char* recipient)
 {
   const char* next;
   const char* buf = response.s;
@@ -31,6 +31,14 @@ static void write_response(obuf* out)
 	obuf_putstr(out, &subject);
 	++buf; --len;
 	break;
+      case 'r':
+        obuf_puts(out, recipient);
+        ++buf; --len;
+        break;
+      case 's':
+        obuf_puts(out, sender);
+        ++buf; --len;
+        break;
       default:
 	obuf_putc(out, '%');
       }
@@ -89,9 +97,9 @@ static void copy_input(obuf* out)
   }
 }
 
-void build_response(obuf* out)
+void build_response(obuf* out, const char* sender, const char* recipient)
 {
-  write_response(out);
+  write_response(out, sender, recipient);
   if (opt_copymsg)
     copy_input(out);
 }

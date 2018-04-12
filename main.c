@@ -137,6 +137,7 @@ int main(int argc, char* argv[])
 {
   obuf bufout;
   obuf* out;
+  const char* recipient;
   const char* sender;
   
   parse_args(argc, argv);
@@ -146,6 +147,9 @@ int main(int argc, char* argv[])
   if (opt_endtime && now > opt_endtime)
     ignore("Autoresponder is no longer active");
 
+  recipient = getenv("RECIPIENT");
+  if(!recipient)
+    usage("RECIPIENT is not set, must be run from qmail.");
   sender = getenv("SENDER");
   if(!sender)
     usage("SENDER is not set, must be run from qmail.");
@@ -177,7 +181,7 @@ int main(int argc, char* argv[])
   if((!opt_no_inreplyto) && (message_id.len != 0))
     obuf_put3s(out, "In-Reply-To: ", message_id.s, "\n");
 
-  build_response(out);
+  build_response(out, sender, recipient);
 
   if (!obuf_close(out))
     fail_temp("Could not close output.");

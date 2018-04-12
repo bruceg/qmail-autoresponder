@@ -60,6 +60,7 @@ runqa() {
 runtest() {
   succeeds=$1
   export SENDER="$2"
+  export RECIPIENT="onvacation@example.org"
   args="$3"
   shift 3
 
@@ -82,6 +83,8 @@ From: nobody in particular
 
 test
 test %S test
+sender is %s
+recipient is %r
 EOF
     # Should send response normally
     runtest true  'me@my.domain' ''
@@ -92,6 +95,8 @@ EOF
     # Check that the response contains the text in the body
     sed -e '1,/^$/d' < stdout | grep -q '^test$'
     sed -e '1,/^$/d' < stdout | grep -q '^test something test$'
+    sed -e '1,/^$/d' < stdout | grep -q '^sender is me@my.domain$'
+    sed -e '1,/^$/d' < stdout | grep -q '^recipient is onvacation@example.org$'
     # Don't send immediately to the same recipient
     runtest false 'me@my.domain' ''
 
