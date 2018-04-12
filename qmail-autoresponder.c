@@ -1,9 +1,11 @@
 #include <bglibs/sysdeps.h>
+#include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <string.h>
 #include <unistd.h>
 #include <bglibs/fmt.h>
+#include <bglibs/ibuf.h>
 #include <bglibs/wrap.h>
 #include <bglibs/str.h>
 #include "qmail-autoresponder.h"
@@ -15,6 +17,7 @@ const char usage_post[] =
 
 static const char* opt_msgfilename = "message.txt";
 static const char* opt_logfilename = "log.txt";
+static const char* opt_configfilename = "config.txt";
 static str safe_sender;
 static const char* last_filename = 0;
 
@@ -31,7 +34,7 @@ static void read_message(const char* filename)
   close(fd);
 }
 
-static void read_config(void)
+static void read_config_files(void)
 {
   struct option* option;
   int fd;
@@ -60,6 +63,42 @@ static void read_config(void)
   }
 }
 
+static int read_config_file(void)
+{
+  ibuf in;
+  str line = {0};
+
+  if (!ibuf_open(&in, opt_configfilename, 0)) {
+    if (errno == ENOENT)
+      return 0;
+    fail_temp("Could not read config.txt");
+  }
+  while (ibuf_getstr(&in, &line, '\n')) {
+    str_rstrip(&line);
+    if (line.len == 0)
+      continue;
+    if (line.s[0] == '#')
+      continue;
+    /* Match lines like "key=value" */
+    unsigned value = str_findfirst(&line, '=');
+    if ((int)value > 0) {
+      int end;
+      /* Skip space before and after the = */
+      for (end = value - 1; end > 0 && isspace(line.s[end - 1]); --end)
+        ;
+      for (value++; value < line.len && isspace(line.s[value]); ++value)
+        ;
+      if (value >= line.len)
+        continue;
+      line.s[end] = 0;
+      handle_option(line.s, line.s + value, line.len - value);
+    }
+  }
+  str_free(&line);
+  ibuf_close(&in);
+  return 1;
+}
+
 void init_autoresponder(int argc, char* argv[])
 {
   int i = 0;
@@ -72,7 +111,8 @@ void init_autoresponder(int argc, char* argv[])
   if(chdir(argv[i]) == -1)
     usage("Could not change directory to DIRECTORY.");
   read_message(opt_msgfilename);
-  read_config();
+  if (!read_config_file())
+    read_config_files();
 }
 
 static void create_link(char* filename)

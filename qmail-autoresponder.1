@@ -85,10 +85,40 @@ second that a message was not sent.  The timestamp is expressed as
 standard UNIX time (the number of seconds since Jan 1 1970 GMT).
 .SH OPTIONS
 .B qmail-autoresponder
-supports options specified on the command line and as files in the
-.I DIRECTORY
-named on the command line.  Option files in the directory override
-options set on the command line.
+supports options specified on the command line, in a file named
+.BR config.txt ,
+and as individual files in
+.IR DIRECTORY .
+If
+.B config.txt
+is present, any individual config files are ignored.
+Option files in the directory (either
+.B config.txt
+or individual files) override options set on the command line.
+.P
+The
+.B config.txt
+file contains one setting per line, with the option name separated from the value by a
+.IR = .
+Spaces around the
+.I =
+are stripped.
+The value extends from the first non-space character to the end of the line.
+Lines starting with
+.I #
+are ignored.
+.P
+For example:
+.RS
+.EX
+copymsg=1
+# Keep all the X-* headers along with the subject.
+headerkeep = subject:x-*
+bcc = sendmeacopy@example.com
+starttime = 2018-03-14 15:59:00
+subject=This is a very long response subject that does not include the original
+.EE
+.RE
 .SS "COMMAND LINE"
 .TP
 .B -c

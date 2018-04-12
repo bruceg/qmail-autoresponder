@@ -1,4 +1,6 @@
 
+- Added support for single file config mode.
+
 - Fixed handling of MySQL default timestamp value.
 -------------------------------------------------------------------------------
 Changes in version 1.0
