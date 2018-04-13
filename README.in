@@ -22,19 +22,10 @@ Features:
   to a single inode.
 - Can limit responses to a certain date/time range.
 
-A mailing list has been set up to discuss this and other packages.
-To subscribe, send an email to:
-	bgware-subscribe@lists.untroubled.org
-A mailing list archive is available at:
-	http://lists.untroubled.org/?list=bgware
-
-Development versions of @PACKAGE@ are available at:
-	https://github.com/bruceg/@PACKAGE@
-
 Installation:
 
 - Make sure the latest version of bglibs from
-  http://untroubled.org/bglibs/ is compiled and installed.
+  https://untroubled.org/bglibs/ is compiled and installed.
 - Build the sources by running "make".  To build the MySQL support, run
   "make mysql" as well.
 - After the package has been compiled, run the following command as root:
@@ -66,7 +57,7 @@ A mailing list has been set up to discuss this and other packages.
 To subscribe, send an email to:
 	bgware-subscribe@lists.untroubled.org
 A mailing list archive is available at:
-	http://lists.untroubled.org/?list=bgware
+	https://lists.untroubled.org/?list=bgware
 
 This program is Copyright(C) @YEAR@ Bruce Guenter, and may be copied
 according to the GNU GENERAL PUBLIC LICENSE (GPL) Version 2 or a later
