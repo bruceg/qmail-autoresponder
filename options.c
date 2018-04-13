@@ -87,6 +87,7 @@ static const char* copy_time(void* ptr, const char* value, unsigned int length)
   }
   for (i = 0; i < sizeof time_formats / sizeof *time_formats; i++) {
     struct tm tm;
+    memset(&tm, 0, sizeof tm);
     if (strptime(value, time_formats[i], &tm) == value + length) {
       if ((*dest = mktime(&tm)) != (time_t)-1)
         return NULL;
