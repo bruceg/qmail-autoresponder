@@ -1,5 +1,4 @@
 #define _XOPEN_SOURCE
-#include <mysql/mysql.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
