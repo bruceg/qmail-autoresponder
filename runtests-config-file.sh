@@ -12,10 +12,10 @@ runqabin() {
 
 set_option() {
     unset_option $1
-    echo "$1 = $2" >> config.txt
+    echo "$1=$2" >> config.txt
 }
 unset_option() {
-    sed -i -e "/^$1 *=/d" config.txt
+    sed -i -e "/^$1=/d" config.txt
 }
 set_message() {
     cat > message.txt

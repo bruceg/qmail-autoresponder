@@ -104,10 +104,9 @@ The
 .B config.txt
 file contains one setting per line, with the option name separated from the value by a
 .IR = .
-Spaces around the
+The value extends from the first character after the
 .I =
-are stripped.
-The value extends from the first non-space character to the end of the line.
+to the end of the line.
 Lines starting with
 .I #
 are ignored.
@@ -122,9 +121,9 @@ For example:
 .EX
 copymsg=1
 # Keep all the X-* headers along with the subject.
-headerkeep = subject:x-*
-bcc = sendmeacopy@example.com
-starttime = 2018-03-14 15:59:00
+headerkeep=subject:x-*
+bcc=sendmeacopy@example.com
+starttime=2018-03-14 15:59:00
 subject=This is a very long response subject that does not include the original
 
 From: Automatic Responder <recipient@example.com>

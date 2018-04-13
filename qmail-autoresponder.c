@@ -74,24 +74,17 @@ static int read_config_file(void)
     fail_temp("Could not read config.txt");
   }
   while (ibuf_getstr(&in, &line, '\n')) {
-    str_rstrip(&line);
+    /* Strip just the trailing \n */
+    str_truncate(&line, line.len - 1);
     if (line.len == 0)
       break;
     if (line.s[0] == '#')
       continue;
     /* Match lines like "key=value" */
-    unsigned value = str_findfirst(&line, '=');
-    if ((int)value > 0) {
-      int end;
-      /* Skip space before and after the = */
-      for (end = value - 1; end > 0 && isspace(line.s[end - 1]); --end)
-        ;
-      for (value++; value < line.len && isspace(line.s[value]); ++value)
-        ;
-      if (value >= line.len)
-        continue;
-      line.s[end] = 0;
-      handle_option(line.s, line.s + value, line.len - value);
+    unsigned eq = str_findfirst(&line, '=');
+    if ((int)eq > 0 && eq < line.len) {
+      line.s[eq++] = 0;
+      handle_option(line.s, line.s + eq, line.len - eq);
     }
   }
   str_free(&line);
